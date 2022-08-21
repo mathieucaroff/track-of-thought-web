@@ -1,0 +1,14 @@
+# Folders
+/*/
+
+!/src/
+
+# Files
+/.*
+*.log
+*.js
+
+!/.editorconfig
+!/.env
+!/.gitignore
+!/.prettier*
