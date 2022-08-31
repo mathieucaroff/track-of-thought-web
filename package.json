@@ -1,23 +1,23 @@
 {
-   "name": "open-train-of-thoughts",
-   "version": "0.1.5",
-   "description": "A game to train diveded attention",
-   "repository": "https://github.com/mathieucaroff/open-train-of-thought",
-   "author": "Mathieu CAROFF <mathieu.caroff@free.fr>",
-   "license": "ISC",
-   "scripts": {
-      "build": "parcel build src/index.html --dist-dir public",
-      "mcabuild": "parcel build src/index.html --public-url open-train-of-thought.d",
-      "serve": "parcel src/index.html"
-   },
-   "devDependencies": {
-      "@types/node": "^18.7.14",
-      "parcel": "^2.7.0",
-      "prettier": "^2.7.1",
-      "querystring-es3": "^0.2.1",
-      "typescript": "^4.7.4"
-   },
-   "dependencies": {
-      "pixi.js": "^6.5.1"
-   }
+  "name": "open-train-of-thoughts",
+  "version": "0.1.5",
+  "description": "A game to train diveded attention",
+  "repository": "https://github.com/mathieucaroff/open-train-of-thought",
+  "author": "Mathieu CAROFF <mathieu.caroff@free.fr>",
+  "license": "ISC",
+  "scripts": {
+    "build": "parcel build src/index.html --dist-dir public",
+    "mcabuild": "parcel build src/index.html --public-url open-train-of-thought.d",
+    "serve": "parcel src/index.html"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.14",
+    "parcel": "^2.7.0",
+    "prettier": "^2.7.1",
+    "querystring-es3": "^0.2.1",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "pixi.js": "^6.5.1"
+  }
 }
