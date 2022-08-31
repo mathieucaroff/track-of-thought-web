@@ -11,8 +11,10 @@
       "serve": "parcel src/index.html"
    },
    "devDependencies": {
+      "@types/node": "^18.7.14",
       "parcel": "^2.7.0",
       "prettier": "^2.7.1",
+      "querystring-es3": "^0.2.1",
       "typescript": "^4.7.4"
    },
    "dependencies": {
