@@ -26,6 +26,7 @@ export interface TrackEntry extends GridPosition {
   end1: Direction
   end2: Direction
   color: string
+  switch: 'true' | 'false'
 }
 
 export interface ImporterObject {

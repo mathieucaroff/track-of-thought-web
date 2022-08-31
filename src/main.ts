@@ -1,11 +1,17 @@
 import * as pixi from 'pixi.js'
 import { Game } from './game'
 import * as graphics from './graphics/graphics'
-import { Direction, GridPosition, importerObject, LevelObject } from './level/importerObject'
+import {
+  Direction,
+  GridPosition,
+  importerObject,
+  LevelObject,
+  TrackEntry,
+} from './level/importerObject'
 
 let app: pixi.Application
 
-let init = () => {
+let init = async () => {
   let type = 'WebGL'
   if (!pixi.utils.isWebGLSupported()) {
     type = 'canvas'
@@ -25,6 +31,17 @@ let init = () => {
   app.renderer.backgroundColor = 0x061639
 
   document.body.appendChild(app.view)
+
+  let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
+  let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
+
+  console.log('level', levelNumber, alternativeNumber)
+
+  let levelContent = await importer()
+
+  console.log('levelContent', levelContent)
+
+  return levelContent
 }
 
 let randomPick = <T>(array: T[]) => {
@@ -92,17 +109,9 @@ let simpleTrack = (start: Direction, end: Direction) => {
   }
 }
 
-let buildLevel = async () => {
-  let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
-  let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
-
-  console.log('level', levelNumber, alternativeNumber)
-
-  let levelContent = await importer()
-
-  console.log('levelContent', levelContent)
-
-  // draw tracks
+let buildLevel = (levelContent: LevelObject) => {
+  // draw tracks and fill the switchArray
+  let switchArray: TrackEntry[] = []
   levelContent.tracks.forEach((track) => {
     let result = new pixi.Container()
 
@@ -117,6 +126,8 @@ let buildLevel = async () => {
       g = simpleTrack(track.start, track.end2)
       setPosition(g, track)
       result.addChild(g)
+
+      switchArray.push(track)
     }
     app.stage.addChild(result)
   })
@@ -128,12 +139,24 @@ let buildLevel = async () => {
     app.stage.addChild(g)
   })
 
-  return levelContent
+  return switchArray
 }
 
 let main = async () => {
-  init()
-  let levelContent = await buildLevel()
+  let levelContent = await init()
+  let switchArray = buildLevel(levelContent)
+  app.renderer.plugins.interaction.on('pointerdown', (event) => {
+    let { x, y } = event.data.global
+    switchArray.some((entry) => {
+      let sx = (entry.column + 0.5) * graphics.SQUARE_WIDTH
+      let sy = (entry.row + 0.5) * graphics.SQUARE_WIDTH
+      if ((x - sx) ** 2 + (y - sy) ** 2 < graphics.SQUARE_WIDTH ** 2 / 4) {
+        ;[entry.end1, entry.end2] = [entry.end2, entry.end1]
+        buildLevel(levelContent)
+        return true
+      }
+    })
+  })
   let game = new Game(levelContent)
   pixi.Ticker.shared.add((dt) => {
     game.update(dt)
