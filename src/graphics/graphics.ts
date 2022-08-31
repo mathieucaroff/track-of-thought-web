@@ -81,3 +81,11 @@ export function train(color: number) {
   g.endFill()
   return g
 }
+
+export function switchCircle() {
+  let g = new pixi.Graphics()
+  g.beginFill(0x668866)
+  g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2)
+  g.endFill()
+  return g
+}

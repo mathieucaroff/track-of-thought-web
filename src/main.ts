@@ -85,6 +85,10 @@ let main = async () => {
     setPosition(g, track)
     result.addChild(g)
     if (track.switch === 'true') {
+      g = graphics.switchCircle()
+      setPosition(g, track)
+      result.addChild(g)
+
       g = simpleTrack(track.start, track.end2)
       setPosition(g, track)
       result.addChild(g)
