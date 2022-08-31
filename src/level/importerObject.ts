@@ -8,6 +8,8 @@ export type GridPosition = {
 }
 
 export interface LevelObject {
+  name: string
+  balls: { amount: number }
   stations: StationEntry[]
   tracks: TrackEntry[]
 }
@@ -28,7 +30,7 @@ export interface TrackEntry extends GridPosition {
 
 export interface ImporterObject {
   [levelNumber: string]: {
-    [alternativeNumber: string]: typeof pathGroup[keyof typeof pathGroup]
+    [alternativeNumber: string]: () => Promise<LevelObject>
   }
 }
 
@@ -37,7 +39,7 @@ let importerObject: ImporterObject = {}
 Object.entries(pathGroup).forEach(([name, importer]) => {
   let [levelNumber, alternativeNumber] = name.split('-')
   importerObject[levelNumber] = importerObject[levelNumber] || {}
-  importerObject[levelNumber][alternativeNumber] = importer
+  importerObject[levelNumber][alternativeNumber] = importer as any as () => Promise<LevelObject>
 })
 
 export { importerObject }

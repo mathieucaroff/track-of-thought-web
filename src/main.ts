@@ -1,26 +1,31 @@
 import * as pixi from 'pixi.js'
+import { Game } from './game'
 import * as graphics from './graphics/graphics'
-import { Direction, GridPosition, importerObject, TrackEntry } from './level/importerObject'
+import { Direction, GridPosition, importerObject, LevelObject } from './level/importerObject'
 
-let type = 'WebGL'
-if (!pixi.utils.isWebGLSupported()) {
-  type = 'canvas'
+let app: pixi.Application
+
+let init = () => {
+  let type = 'WebGL'
+  if (!pixi.utils.isWebGLSupported()) {
+    type = 'canvas'
+  }
+
+  pixi.utils.sayHello(type)
+
+  app = new pixi.Application({})
+
+  // size
+  let resize = () => {
+    app.renderer.resize(window.innerWidth - 3, window.innerHeight - 4)
+  }
+  resize()
+  window.addEventListener('resize', resize)
+
+  app.renderer.backgroundColor = 0x061639
+
+  document.body.appendChild(app.view)
 }
-
-pixi.utils.sayHello(type)
-
-let app = new pixi.Application({})
-
-// size
-let resize = () => {
-  app.renderer.resize(window.innerWidth - 3, window.innerHeight - 4)
-}
-resize()
-window.addEventListener('resize', resize)
-
-app.renderer.backgroundColor = 0x061639
-
-document.body.appendChild(app.view)
 
 let randomPick = <T>(array: T[]) => {
   return array[Math.floor(Math.random() * array.length)]
@@ -87,7 +92,7 @@ let simpleTrack = (start: Direction, end: Direction) => {
   }
 }
 
-let main = async () => {
+let buildLevel = async () => {
   let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
   let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
 
@@ -121,6 +126,17 @@ let main = async () => {
     let g = graphics.station(colorNameToNumber(entry.color) || 0x222222)
     setPosition(g, entry)
     app.stage.addChild(g)
+  })
+
+  return levelContent
+}
+
+let main = async () => {
+  init()
+  let levelContent = await buildLevel()
+  let game = new Game(levelContent)
+  pixi.Ticker.shared.add((dt) => {
+    game.update(dt)
   })
 }
 
