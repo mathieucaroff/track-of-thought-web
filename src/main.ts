@@ -1,13 +1,7 @@
 import * as pixi from 'pixi.js'
 import { Game } from './game'
 import * as graphics from './graphics/graphics'
-import {
-  Direction,
-  GridPosition,
-  importerObject,
-  LevelObject,
-  TrackEntry,
-} from './level/importerObject'
+import { Direction, GridPosition, importerObject, LevelObject } from './level/importerObject'
 
 let app: pixi.Application
 
@@ -111,7 +105,6 @@ let simpleTrack = (start: Direction, end: Direction) => {
 
 let buildLevel = (levelContent: LevelObject) => {
   // draw tracks and fill the switchArray
-  let switchArray: TrackEntry[] = []
   levelContent.tracks.forEach((track) => {
     let result = new pixi.Container()
 
@@ -122,12 +115,34 @@ let buildLevel = (levelContent: LevelObject) => {
       g = graphics.switchCircle()
       setPosition(g, track)
       result.addChild(g)
+      g.interactive = true
+      g.hitArea = new pixi.Circle(
+        graphics.SQUARE_WIDTH / 2,
+        graphics.SQUARE_WIDTH / 2,
+        graphics.SQUARE_WIDTH / 2,
+      )
+      ;(g as any).mousedown = () => {
+        ;[track.end1, track.end2] = [track.end2, track.end1]
+        let g = simpleTrack(track.start, track.end1)
+        setPosition(g, track)
+        result.addChild(g)
+        g = graphics.switchCircle()
+        setPosition(g, track)
+        result.addChild(g)
+        g = simpleTrack(track.start, track.end2)
+        setPosition(g, track)
+        result.addChild(g)
+      }
+      ;(g as any).mouseover = () => {
+        app.view.style.cursor = 'pointer'
+      }
+      ;(g as any).mouseout = () => {
+        app.view.style.cursor = 'inherit'
+      }
 
       g = simpleTrack(track.start, track.end2)
       setPosition(g, track)
       result.addChild(g)
-
-      switchArray.push(track)
     }
     app.stage.addChild(result)
   })
@@ -138,25 +153,11 @@ let buildLevel = (levelContent: LevelObject) => {
     setPosition(g, entry)
     app.stage.addChild(g)
   })
-
-  return switchArray
 }
 
 let main = async () => {
   let levelContent = await init()
-  let switchArray = buildLevel(levelContent)
-  app.renderer.plugins.interaction.on('pointerdown', (event) => {
-    let { x, y } = event.data.global
-    switchArray.some((entry) => {
-      let sx = (entry.column + 0.5) * graphics.SQUARE_WIDTH
-      let sy = (entry.row + 0.5) * graphics.SQUARE_WIDTH
-      if ((x - sx) ** 2 + (y - sy) ** 2 < graphics.SQUARE_WIDTH ** 2 / 4) {
-        ;[entry.end1, entry.end2] = [entry.end2, entry.end1]
-        buildLevel(levelContent)
-        return true
-      }
-    })
-  })
+  buildLevel(levelContent)
   let game = new Game(levelContent)
   pixi.Ticker.shared.add((dt) => {
     game.update(dt)
