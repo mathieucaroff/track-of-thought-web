@@ -1,13 +1,13 @@
 {
-  "name": "open-train-of-thoughts",
-  "version": "0.1.5",
+  "name": "track-of-thought-web",
+  "version": "0.1.0",
   "description": "A game to train diveded attention",
-  "repository": "https://github.com/mathieucaroff/open-train-of-thought",
+  "repository": "https://github.com/mathieucaroff/track-of-thought-web",
   "author": "Mathieu CAROFF <mathieu.caroff@free.fr>",
   "license": "ISC",
   "scripts": {
-    "build": "parcel build src/index.html --dist-dir public",
-    "mcabuild": "parcel build src/index.html --public-url open-train-of-thought.d",
+    "build": "node src/level/generate-level-importer.js && parcel build src/index.html",
+    "mcabuild": "node src/level/generate-level-importer.js && parcel build src/index.html --public-url track-of-thought-web.d",
     "serve": "parcel src/index.html"
   },
   "devDependencies": {
