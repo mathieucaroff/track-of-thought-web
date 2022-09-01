@@ -1,11 +1,7 @@
+import { GridPosition } from '../type'
 import { pathGroup } from './levelImporter'
 
 export type Direction = 'top' | 'bottom' | 'left' | 'right'
-
-export type GridPosition = {
-  column: number
-  row: number
-}
 
 export interface LevelObject {
   name: string
