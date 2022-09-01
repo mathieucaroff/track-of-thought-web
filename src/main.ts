@@ -2,7 +2,9 @@ import * as pixi from 'pixi.js'
 import { SQUARE_WIDTH } from './constants'
 import { Game } from './game'
 import * as graphics from './graphics/graphics'
-import { Direction, importerObject, LevelObject } from './level/importerObject'
+import { createGrid, Grid } from './grid'
+import { importerObject } from './level/importerObject'
+import { Direction } from './type'
 import { colorNameToNumber, randomPick, addPosition } from './util'
 
 let app: pixi.Application
@@ -28,16 +30,18 @@ let init = async () => {
 
   document.body.appendChild(app.view)
 
-  let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
-  let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
-
-  console.log('level', levelNumber, alternativeNumber)
+  // let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
+  // let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
+  // console.log('level', levelNumber, alternativeNumber)
+  let importer = importerObject['04']['4']
 
   let levelContent = await importer()
 
   console.log('levelContent', levelContent)
 
-  return levelContent
+  let grid = createGrid(levelContent)
+
+  return grid
 }
 
 let aligned = (a: Direction, b: Direction) => {
@@ -74,15 +78,17 @@ let simpleTrack = (start: Direction, end: Direction) => {
   }
 }
 
-let buildLevel = (levelContent: LevelObject) => {
+let buildLevel = (grid: Grid) => {
   // draw tracks and fill the switchArray
-  levelContent.tracks.forEach((track) => {
+  grid.tracks.forEach((track) => {
     let result = new pixi.Container()
 
-    let g = simpleTrack(track.start, track.end1)
-    addPosition(g, track)
-    result.addChild(g)
+    let g: pixi.Graphics
     if (track.switch === 'true') {
+      g = simpleTrack(track.start, track.end2)
+      addPosition(g, track)
+      result.addChild(g)
+
       g = graphics.switchCircle()
       addPosition(g, track)
       result.addChild(g)
@@ -90,13 +96,13 @@ let buildLevel = (levelContent: LevelObject) => {
       g.hitArea = new pixi.Circle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2)
       ;(g as any).mousedown = () => {
         ;[track.end1, track.end2] = [track.end2, track.end1]
-        let g = simpleTrack(track.start, track.end1)
+        let g = simpleTrack(track.start, track.end2)
         addPosition(g, track)
         result.addChild(g)
         g = graphics.switchCircle()
         addPosition(g, track)
         result.addChild(g)
-        g = simpleTrack(track.start, track.end2)
+        g = simpleTrack(track.start, track.end1)
         addPosition(g, track)
         result.addChild(g)
       }
@@ -106,16 +112,15 @@ let buildLevel = (levelContent: LevelObject) => {
       ;(g as any).mouseout = () => {
         app.view.style.cursor = 'inherit'
       }
-
-      g = simpleTrack(track.start, track.end2)
-      addPosition(g, track)
-      result.addChild(g)
     }
+    g = simpleTrack(track.start, track.end1)
+    addPosition(g, track)
+    result.addChild(g)
     app.stage.addChild(result)
   })
 
   // draw stations
-  levelContent.stations.forEach((entry) => {
+  grid.stations.forEach((entry) => {
     let g = graphics.station(colorNameToNumber(entry.color) || 0x222222)
     addPosition(g, entry)
     app.stage.addChild(g)
@@ -123,14 +128,10 @@ let buildLevel = (levelContent: LevelObject) => {
 }
 
 let main = async () => {
-  let levelContent = await init()
-  buildLevel(levelContent)
-  let game = new Game(app, levelContent)
-  let a = 0
+  let grid = await init()
+  buildLevel(grid)
+  let game = new Game(app, grid)
   pixi.Ticker.shared.add(() => {
-    if (a++ < 3) {
-      console.log(pixi.Ticker.shared)
-    }
     game.update(pixi.Ticker.shared.elapsedMS)
   })
 }
