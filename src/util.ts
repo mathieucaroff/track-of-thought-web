@@ -1,6 +1,6 @@
 import * as pixi from 'pixi.js'
 import { SQUARE_WIDTH } from './constants'
-import { GridPosition } from './type'
+import { Direction, GridPosition } from './type'
 
 export let randomPick = <T>(array: T[]) => {
   return array[Math.floor(Math.random() * array.length)]
@@ -36,4 +36,28 @@ export let setPosition = (g: pixi.Container, position: GridPosition) => {
   g.x = SQUARE_WIDTH * position.column
   g.y = SQUARE_WIDTH * position.row
   return g
+}
+
+export let oppositeOf = (d: Direction): Direction => {
+  return {
+    top: 'bottom',
+    bottom: 'top',
+    left: 'right',
+    right: 'left',
+  }[d] as any
+}
+
+export let isStraight = (a: Direction, b: Direction) => {
+  let [c, d] = [a, b].sort()
+  return (c === 'bottom' && d === 'top') || (c === 'left' && d === 'right')
+}
+
+export let isVertical = (a: Direction, b: Direction) => {
+  let [c, d] = [a, b].sort()
+  return c === 'bottom' && d === 'top'
+}
+
+export let isHorizontal = (a: Direction, b: Direction) => {
+  let [c, d] = [a, b].sort()
+  return c === 'left' && d === 'right'
 }
