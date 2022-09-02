@@ -8,6 +8,7 @@ import { Direction } from './type'
 import { colorNameToNumber, randomPick, addPosition, isStraight } from './util'
 
 let app: pixi.Application
+let speedFactor = 1
 
 let init = async () => {
   let type = 'WebGL'
@@ -40,6 +41,18 @@ let init = async () => {
   console.log('levelContent', levelContent)
 
   let grid = createGrid(levelContent)
+
+  // speedFactor hooks
+  window.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+      speedFactor = 3
+    }
+  })
+  window.addEventListener('keyup', (event) => {
+    if (event.key === ' ') {
+      speedFactor = 1
+    }
+  })
 
   return grid
 }
@@ -116,10 +129,13 @@ let buildLevel = (grid: Grid) => {
 
   // draw stations
   grid.stations.forEach((entry) => {
-    let g = graphics.station(colorNameToNumber(entry.color) || 0x222222)
+    let g = graphics.station(colorNameToNumber(entry.color) ?? 0x222222)
     addPosition(g, entry)
     app.stage.addChild(g)
   })
+  let g = graphics.station(colorNameToNumber(grid.start.color) ?? 0x222222)
+  addPosition(g, grid.start)
+  app.stage.addChild(g)
 }
 
 let main = async () => {
@@ -127,7 +143,7 @@ let main = async () => {
   buildLevel(grid)
   let game = new Game(app, grid)
   pixi.Ticker.shared.add(() => {
-    game.update(pixi.Ticker.shared.elapsedMS)
+    game.update(pixi.Ticker.shared.elapsedMS * speedFactor)
   })
 }
 

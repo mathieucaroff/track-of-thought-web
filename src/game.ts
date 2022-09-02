@@ -20,9 +20,9 @@ export class Game {
       this.startTimeArray.shift()
       let train = new Train(
         this.grid,
-        { ...this.grid.stations[0] },
+        { ...this.grid.start },
         0.5,
-        colorNameToNumber(randomPick(this.grid.stations.slice(1)).color) || 0,
+        colorNameToNumber(randomPick(this.grid.stations).color) || 0,
         true,
       )
       this.trainArray.push(train)
