@@ -3,7 +3,7 @@ import { SQUARE_WIDTH } from './constants'
 import * as graphics from './graphics/graphics'
 import { Grid } from './grid'
 import { Direction, GridPosition } from './type'
-import { setPosition } from './util'
+import { isHorizontal, isVertical, oppositeOf, setPosition } from './util'
 
 export class Train {
   g: pixi.Graphics
@@ -36,7 +36,51 @@ export class Train {
       this.progress -= 1
     }
     setPosition(this.g, this.gridPosition)
-    this.g.x += this.progress * SQUARE_WIDTH
+
+    let { row, column } = this.gridPosition
+    let track = this.grid.content[row][column]
+    if (!track) {
+      throw new Error(`encountered an undefined entry in the grid, at ${row}:${column}`)
+    }
+
+    let start: Direction
+    let exit: Direction
+    if (track.type === 'start') {
+      exit = track.exit
+      start = oppositeOf(exit)
+    } else if (track.type === 'normal') {
+      // at the station
+      this.running = false
+      return
+    } else if (track.type !== 'curved' && track.type !== 'straight') {
+      throw new Error(`encountered the wrong grid entry type: ${track?.type}`)
+    } else {
+      exit = track.end1
+      start = track.start
+    }
+
+    if (start === 'left' && exit === 'right') {
+      this.g.x += (this.progress - 0.5) * SQUARE_WIDTH
+    } else if (start === 'right' && exit === 'left') {
+      this.g.x += (0.5 - this.progress) * SQUARE_WIDTH
+    } else if (start === 'top' && exit === 'bottom') {
+      this.g.y += (this.progress - 0.5) * SQUARE_WIDTH
+    } else if (start === 'bottom' && exit === 'top') {
+      this.g.y += (0.5 - this.progress) * SQUARE_WIDTH
+    } else {
+      // turn case
+      let from = Math.sin((this.progress * Math.PI) / 2)
+      let to = Math.cos((this.progress * Math.PI) / 2)
+      if (start === 'left') this.g.x += ((from - 1) * SQUARE_WIDTH) / 2
+      if (start === 'right') this.g.x -= ((from - 1) * SQUARE_WIDTH) / 2
+      if (start === 'bottom') this.g.y += ((1 - from) * SQUARE_WIDTH) / 2
+      if (start === 'top') this.g.y -= ((1 - from) * SQUARE_WIDTH) / 2
+
+      if (exit === 'left') this.g.x += ((to - 1) * SQUARE_WIDTH) / 2
+      if (exit === 'right') this.g.x -= ((to - 1) * SQUARE_WIDTH) / 2
+      if (exit === 'bottom') this.g.y += ((1 - to) * SQUARE_WIDTH) / 2
+      if (exit === 'top') this.g.y -= ((1 - to) * SQUARE_WIDTH) / 2
+    }
   }
   next() {
     let { row, column } = this.gridPosition

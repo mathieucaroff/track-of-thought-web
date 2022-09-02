@@ -5,7 +5,7 @@ import * as graphics from './graphics/graphics'
 import { createGrid, Grid } from './grid'
 import { importerObject } from './level/importerObject'
 import { Direction } from './type'
-import { colorNameToNumber, randomPick, addPosition } from './util'
+import { colorNameToNumber, randomPick, addPosition, isStraight } from './util'
 
 let app: pixi.Application
 
@@ -30,10 +30,10 @@ let init = async () => {
 
   document.body.appendChild(app.view)
 
-  // let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
-  // let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
-  // console.log('level', levelNumber, alternativeNumber)
-  let importer = importerObject['04']['4']
+  let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
+  let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
+  console.log('level', levelNumber, alternativeNumber)
+  // let importer = importerObject['04']['4']
 
   let levelContent = await importer()
 
@@ -44,16 +44,11 @@ let init = async () => {
   return grid
 }
 
-let aligned = (a: Direction, b: Direction) => {
-  let [c, d] = [a, b].sort()
-  return (c === 'bottom' && d === 'top') || (c === 'left' && d === 'right')
-}
-
 let simpleTrack = (start: Direction, end: Direction) => {
   if (start === end) {
     throw new Error(`encountered equal start and end (${start}) in some level file`)
   }
-  if (aligned(start, end)) {
+  if (isStraight(start, end)) {
     let result = graphics.road()
     if ([start, end].includes('top')) {
       result.rotation = Math.PI / 2
