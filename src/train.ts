@@ -3,7 +3,7 @@ import { SQUARE_WIDTH } from './constants'
 import * as graphics from './graphics/graphics'
 import { Grid } from './grid'
 import { Direction, GridPosition } from './type'
-import { oppositeOf, setPosition } from './util'
+import { colorNameToNumber, oppositeOf, setPosition } from './util'
 
 export class Train {
   g: pixi.Graphics
@@ -123,5 +123,14 @@ export class Train {
     } else {
       this.gridPosition.row--
     }
+  }
+
+  colorMatchesStation() {
+    let { row, column } = this.gridPosition
+    let entry = this.grid.content[row][column]
+    if (!entry || entry.type !== 'normal') {
+      throw new Error('encountered colorMatchesStation call while the train is not on a station')
+    }
+    return this.color === colorNameToNumber(entry.color)
   }
 }

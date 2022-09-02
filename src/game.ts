@@ -7,6 +7,8 @@ export class Game {
   trainArray: Train[] = []
   startTimeArray: number[]
   elapsedTimeMs: number
+  totalTrainCount = 0
+  goodTrainCount = 0
   constructor(public app: pixi.Application, public grid: Grid) {
     let length = grid.balls.amount
     this.startTimeArray = Array.from({ length }, (_, k) => {
@@ -33,6 +35,14 @@ export class Game {
     this.trainArray = this.trainArray.filter((train) => {
       if (!train.running) {
         this.app.stage.removeChild(train.g)
+        this.totalTrainCount += 1
+        if (train.colorMatchesStation()) {
+          this.goodTrainCount += 1
+        }
+        console.log(`${this.goodTrainCount} / ${this.totalTrainCount}`)
+        if (this.totalTrainCount === this.grid.balls.amount) {
+          console.log('end', this.goodTrainCount - this.totalTrainCount)
+        }
         return false
       }
       return true
