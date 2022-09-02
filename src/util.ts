@@ -51,13 +51,3 @@ export let isStraight = (a: Direction, b: Direction) => {
   let [c, d] = [a, b].sort()
   return (c === 'bottom' && d === 'top') || (c === 'left' && d === 'right')
 }
-
-export let isVertical = (a: Direction, b: Direction) => {
-  let [c, d] = [a, b].sort()
-  return c === 'bottom' && d === 'top'
-}
-
-export let isHorizontal = (a: Direction, b: Direction) => {
-  let [c, d] = [a, b].sort()
-  return c === 'left' && d === 'right'
-}
