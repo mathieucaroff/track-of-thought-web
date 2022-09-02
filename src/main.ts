@@ -4,13 +4,17 @@ import { Game } from './game'
 import * as graphics from './graphics/graphics'
 import { createGrid, Grid } from './grid'
 import { importerObject } from './level/importerObject'
+import { githubCornerHTML } from './lib/githubCorner'
 import { Direction } from './type'
 import { colorNameToNumber, randomPick, addPosition, isStraight } from './util'
+import { default as packageJson } from '../package.json'
 
 let app: pixi.Application
 let speedFactor = 1
 
 let init = async () => {
+  document.body.innerHTML += githubCornerHTML(packageJson.repository, packageJson.version)
+
   let type = 'WebGL'
   if (!pixi.utils.isWebGLSupported()) {
     type = 'canvas'
