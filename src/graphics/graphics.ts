@@ -1,15 +1,14 @@
 import * as pixi from 'pixi.js'
-export const SQUARE_WIDTH = 64 // px
-
-const SQUARE_BORDER = 4
-
-const ROAD_WIDTH = 32
-const INTERIOR_ROAD_WIDTH = 24
-const ROAD_HOLE = (SQUARE_WIDTH - ROAD_WIDTH) / 2
-const ROAD_BORDER = (ROAD_WIDTH - INTERIOR_ROAD_WIDTH) / 2
-
-const PAVEMENT_COLOR = 0xb0b0b0
-const ASPHALT_COLOR = 0x404040
+import {
+  ASPHALT_COLOR,
+  INTERIOR_ROAD_WIDTH,
+  PAVEMENT_COLOR,
+  ROAD_BORDER,
+  ROAD_HOLE,
+  ROAD_WIDTH,
+  SQUARE_BORDER,
+  SQUARE_WIDTH,
+} from '../constants'
 
 export function roadTurn() {
   let g = new pixi.Graphics()
