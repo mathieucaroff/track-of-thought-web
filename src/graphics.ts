@@ -8,7 +8,7 @@ import {
   ROAD_WIDTH,
   SQUARE_BORDER,
   SQUARE_WIDTH,
-} from '../constants'
+} from './constants'
 
 export function roadTurn() {
   let g = new pixi.Graphics()

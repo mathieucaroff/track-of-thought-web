@@ -1,7 +1,7 @@
 import * as pixi from 'pixi.js'
 import { SQUARE_WIDTH, SWITCH_COLOR, SWITCH_HOVER_COLOR } from './constants'
 import { Game } from './game'
-import * as graphics from './graphics/graphics'
+import * as graphics from './graphics'
 import { createGrid, Grid } from './grid'
 import { importerObject } from './level/importerObject'
 import { githubCornerHTML } from './lib/githubCorner'

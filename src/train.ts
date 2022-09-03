@@ -1,6 +1,6 @@
 import * as pixi from 'pixi.js'
 import { SQUARE_WIDTH } from './constants'
-import * as graphics from './graphics/graphics'
+import * as graphics from './graphics'
 import { Grid } from './grid'
 import { Direction, GridPosition } from './type'
 import { colorNameToNumber, oppositeOf, setPosition } from './util'
