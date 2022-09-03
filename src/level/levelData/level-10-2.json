@@ -414,10 +414,10 @@
       "switch": "false"
     },
     {
-      "start": "right",
+      "start": "bottom",
       "end2": "right",
       "column": 9,
-      "end1": "bottom",
+      "end1": "right",
       "row": 4,
       "type": "curved",
       "switch": "false"
