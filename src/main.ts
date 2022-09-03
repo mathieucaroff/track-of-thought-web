@@ -90,7 +90,7 @@ let simpleTrack = (start: Direction, end: Direction) => {
   }
 }
 
-let buildLevel = (grid: Grid) => {
+let addTracks = (grid: Grid) => {
   // draw tracks and fill the switchArray
   grid.tracks.forEach((track) => {
     let result = new pixi.Container()
@@ -130,7 +130,9 @@ let buildLevel = (grid: Grid) => {
     result.addChild(g)
     app.stage.addChild(result)
   })
+}
 
+let addStations = (grid: Grid) => {
   // draw stations
   grid.stations.forEach((entry) => {
     let g = graphics.station(colorNameToNumber(entry.color) ?? 0x222222)
@@ -144,7 +146,8 @@ let buildLevel = (grid: Grid) => {
 
 let main = async () => {
   let grid = await init()
-  buildLevel(grid)
+  addTracks(grid)
+  addStations(grid)
   let game = new Game(app, grid)
   pixi.Ticker.shared.add(() => {
     game.update(pixi.Ticker.shared.elapsedMS * speedFactor)

@@ -34,15 +34,7 @@ export class Game {
     // remove the trains which have reached a station
     this.trainArray = this.trainArray.filter((train) => {
       if (!train.running) {
-        this.app.stage.removeChild(train.g)
-        this.totalTrainCount += 1
-        if (train.colorMatchesStation()) {
-          this.goodTrainCount += 1
-        }
-        console.log(`${this.goodTrainCount} / ${this.totalTrainCount}`)
-        if (this.totalTrainCount === this.grid.balls.amount) {
-          console.log('end', this.goodTrainCount - this.totalTrainCount)
-        }
+        this.removeTrain(train)
         return false
       }
       return true
@@ -52,5 +44,27 @@ export class Game {
     this.trainArray.forEach((train) => {
       train.update(elapsedMS)
     })
+  }
+
+  removeTrain(train: Train) {
+    this.app.stage.removeChild(train.g)
+    this.totalTrainCount += 1
+    if (train.colorMatchesStation()) {
+      this.goodTrainCount += 1
+    }
+    console.log(`${this.goodTrainCount} / ${this.totalTrainCount}`)
+    if (this.totalTrainCount === this.grid.balls.amount) {
+      this.reportUserResult()
+    }
+  }
+
+  reportUserResult() {
+    let diff = this.goodTrainCount - this.totalTrainCount
+    console.log('end', diff)
+    if (this.goodTrainCount === this.totalTrainCount) {
+      console.log('Perfect score!')
+    } else if (diff >= -2) {
+      console.log('Congratulation on completing this level')
+    }
   }
 }
