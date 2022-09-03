@@ -12,6 +12,18 @@ import { default as packageJson } from '../package.json'
 let app: pixi.Application
 let speedFactor = 1
 
+let importLevel = (prop: { levelNumber?: string; alternativeNumber?: string } = {}) => {
+  if (!prop.levelNumber) {
+    prop.levelNumber = randomPick(Object.keys(importerObject))
+  }
+  let alternativeImporterObject = importerObject[prop.levelNumber]
+  if (!prop.alternativeNumber) {
+    prop.alternativeNumber = randomPick(Object.keys(alternativeImporterObject))
+  }
+  console.log('level', prop.levelNumber, prop.alternativeNumber)
+  return alternativeImporterObject[prop.alternativeNumber]()
+}
+
 let init = async () => {
   document.body.innerHTML += githubCornerHTML(packageJson.repository, packageJson.version)
 
@@ -31,16 +43,17 @@ let init = async () => {
   resize()
   window.addEventListener('resize', resize)
 
-  app.renderer.backgroundColor = 0x061639
+  app.renderer.backgroundColor = 0x2d2e37
 
   document.body.appendChild(app.view)
 
-  let [levelNumber, alternativeImporterObject] = randomPick(Object.entries(importerObject))
-  let [alternativeNumber, importer] = randomPick(Object.entries(alternativeImporterObject))
-  console.log('level', levelNumber, alternativeNumber)
-  // let importer = importerObject['04']['4']
-
-  let levelContent = await importer()
+  let param = new URLSearchParams(location.search)
+  let levelNumber: string | undefined = undefined
+  let alternativeNumber: string | undefined = undefined
+  if (param.has('level')) {
+    ;[levelNumber, alternativeNumber] = param.get('level')!.split('-')
+  }
+  let levelContent = await importLevel({ levelNumber, alternativeNumber })
 
   console.log('levelContent', levelContent)
 

@@ -9,12 +9,24 @@ export class Game {
   elapsedTimeMs: number
   totalTrainCount = 0
   goodTrainCount = 0
+  score: pixi.Text
   constructor(public app: pixi.Application, public grid: Grid) {
     let length = grid.balls.amount
     this.startTimeArray = Array.from({ length }, (_, k) => {
       return (k / length) * 100 * 1000 // spread the train's start time over the course of 100 seconds
     })
     this.elapsedTimeMs = 0
+
+    this.score = new pixi.Text(
+      `0 / 0`,
+      new pixi.TextStyle({
+        fill: 'white',
+        strokeThickness: 6,
+      }),
+    )
+    this.score.x = 10
+    this.score.y = 550
+    app.stage.addChild(this.score)
   }
   update(elapsedMS: number) {
     this.elapsedTimeMs += elapsedMS
@@ -52,7 +64,7 @@ export class Game {
     if (train.colorMatchesStation()) {
       this.goodTrainCount += 1
     }
-    console.log(`${this.goodTrainCount} / ${this.totalTrainCount}`)
+    this.writeText(`${this.goodTrainCount} / ${this.totalTrainCount}`)
     if (this.totalTrainCount === this.grid.balls.amount) {
       this.reportUserResult()
     }
@@ -60,11 +72,20 @@ export class Game {
 
   reportUserResult() {
     let diff = this.goodTrainCount - this.totalTrainCount
-    console.log('end', diff)
-    if (this.goodTrainCount === this.totalTrainCount) {
-      console.log('Perfect score!')
+    this.writeText(`end: ${diff}`, true)
+    if (diff === 0) {
+      this.writeText('Perfect score!', true)
     } else if (diff >= -2) {
-      console.log('Congratulation on completing this level')
+      this.writeText('Congratulation on completing this level!', true)
+    }
+  }
+
+  writeText(text: string, addLine = false) {
+    console.log(text)
+    if (addLine) {
+      this.score.text += '\n' + text
+    } else {
+      this.score.text = '\n' + text
     }
   }
 }
