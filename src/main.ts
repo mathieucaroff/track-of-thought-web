@@ -1,5 +1,5 @@
 import * as pixi from 'pixi.js'
-import { SQUARE_WIDTH } from './constants'
+import { SQUARE_WIDTH, SWITCH_COLOR, SWITCH_HOVER_COLOR } from './constants'
 import { Game } from './game'
 import * as graphics from './graphics/graphics'
 import { createGrid, Grid } from './grid'
@@ -101,28 +101,38 @@ let addTracks = (grid: Grid) => {
       addPosition(g, track)
       result.addChild(g)
 
-      g = graphics.switchCircle()
+      g = graphics.switchCircle(SWITCH_COLOR)
       addPosition(g, track)
       result.addChild(g)
       g.interactive = true
-      g.hitArea = new pixi.Circle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2)
-      ;(g as any).mousedown = () => {
-        ;[track.end1, track.end2] = [track.end2, track.end1]
+      g.hitArea = new pixi.Circle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH)
+
+      let drawSwitch = (circleColor: number) => {
         let g = simpleTrack(track.start, track.end2)
         addPosition(g, track)
         result.addChild(g)
-        g = graphics.switchCircle()
+        g = graphics.switchCircle(circleColor)
         addPosition(g, track)
         result.addChild(g)
         g = simpleTrack(track.start, track.end1)
         addPosition(g, track)
         result.addChild(g)
       }
+
+      let switchTrack = () => {
+        ;[track.end1, track.end2] = [track.end2, track.end1]
+        drawSwitch(SWITCH_HOVER_COLOR)
+      }
+
+      ;(g as any).on('mousedown', switchTrack)
+      ;(g as any).on('tap', switchTrack)
       ;(g as any).mouseover = () => {
         app.view.style.cursor = 'pointer'
+        drawSwitch(SWITCH_HOVER_COLOR)
       }
       ;(g as any).mouseout = () => {
         app.view.style.cursor = 'inherit'
+        drawSwitch(SWITCH_COLOR)
       }
     }
     g = simpleTrack(track.start, track.end1)

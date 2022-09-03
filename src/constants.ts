@@ -8,3 +8,5 @@ export const ROAD_HOLE = (SQUARE_WIDTH - ROAD_WIDTH) / 2
 export const ROAD_BORDER = (ROAD_WIDTH - INTERIOR_ROAD_WIDTH) / 2
 export const PAVEMENT_COLOR = 0xb0b0b0
 export const ASPHALT_COLOR = 0x404040
+export const SWITCH_COLOR = 0x999999
+export const SWITCH_HOVER_COLOR = 0xbbbbbb
