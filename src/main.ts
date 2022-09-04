@@ -1,5 +1,5 @@
 import * as pixi from 'pixi.js'
-import { SQUARE_WIDTH, SWITCH_COLOR, SWITCH_HOVER_COLOR } from './constants'
+import { BACKGROUND_COLOR, SQUARE_WIDTH, SWITCH_COLOR, SWITCH_HOVER_COLOR } from './constants'
 import { Game } from './game'
 import * as graphics from './graphics'
 import { createGrid, Grid } from './grid'
@@ -45,7 +45,7 @@ let init = async () => {
   resize()
   window.addEventListener('resize', resize)
 
-  app.renderer.backgroundColor = 0x2d2e37
+  app.renderer.backgroundColor = BACKGROUND_COLOR
 
   document.body.appendChild(app.view)
 

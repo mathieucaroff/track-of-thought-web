@@ -8,6 +8,8 @@ import {
   ROAD_WIDTH,
   SQUARE_BORDER,
   SQUARE_WIDTH,
+  SWITCH_OUTLINE_COLOR,
+  SWITCH_OUTLINE_WIDTH,
 } from './constants'
 
 export function roadTurn() {
@@ -83,8 +85,10 @@ export function train(color: number) {
 
 export function switchCircle(circleColor: number) {
   let g = new pixi.Graphics()
-  g.beginFill(circleColor)
+  g.beginFill(SWITCH_OUTLINE_COLOR)
   g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2)
+  g.beginFill(circleColor)
+  g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2 - SWITCH_OUTLINE_WIDTH)
   g.endFill()
   return g
 }

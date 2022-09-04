@@ -26,7 +26,7 @@ export class Game {
       }),
     )
     this.score.x = 10
-    this.score.y = 550
+    this.score.y = 580
     app.stage.addChild(this.score)
   }
   update(elapsedMS: number) {
