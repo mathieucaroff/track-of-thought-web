@@ -19,7 +19,7 @@ export class Game {
     this.elapsedTimeMs = 0
 
     this.score = new pixi.Text(
-      `0 / 0`,
+      `0 / 0 (-0)`,
       new pixi.TextStyle({
         fill: 'white',
         strokeThickness: 6,
@@ -67,7 +67,11 @@ export class Game {
     } else {
       errorSound.play()
     }
-    this.writeText(`${this.goodTrainCount} / ${this.totalTrainCount}`)
+    this.writeText(
+      `${this.goodTrainCount} / ${this.totalTrainCount} (-${
+        this.totalTrainCount - this.goodTrainCount
+      })`,
+    )
     if (this.totalTrainCount === this.grid.balls.amount) {
       this.reportUserResult()
     }
@@ -75,7 +79,6 @@ export class Game {
 
   reportUserResult() {
     let diff = this.goodTrainCount - this.totalTrainCount
-    this.writeText(`end: ${diff}`, true)
     if (diff === 0) {
       this.writeText('Perfect score!', true)
     } else if (diff >= -2) {
