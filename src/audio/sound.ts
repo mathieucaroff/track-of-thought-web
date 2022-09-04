@@ -1,3 +1,4 @@
-import buttonClickSingleUrl from 'url:../../asset/sound/button-click-single.mp3'
-
-export const buttonClickSingle = new Audio(buttonClickSingleUrl)
+import clickUrl from 'url:../../asset/sound/click.mp3'
+import errorUrl from 'url:../../asset/sound/error.mp3'
+export const clickSound = new Audio(clickUrl)
+export const errorSound = new Audio(errorUrl)

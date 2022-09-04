@@ -9,7 +9,7 @@ import { Direction } from './type'
 import { colorNameToNumber, randomPick, addPosition, isStraight } from './util'
 import { default as packageJson } from '../package.json'
 import './audio/sound.ts'
-import { buttonClickDouble, buttonClickSingle } from './audio/sound'
+import { clickSound } from './audio/sound'
 
 let app: pixi.Application
 let speedFactor = 1
@@ -136,7 +136,7 @@ let addTracks = (grid: Grid) => {
 
       let switchTrack = () => {
         ;[track.end1, track.end2] = [track.end2, track.end1]
-        buttonClickSingle.play()
+        clickSound.play()
         drawSwitch(SWITCH_HOVER_COLOR)
       }
 

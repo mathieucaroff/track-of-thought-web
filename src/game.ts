@@ -2,6 +2,7 @@ import * as pixi from 'pixi.js'
 import { Train } from './train'
 import { colorNameToNumber, randomPick } from './util'
 import { Grid } from './grid'
+import { errorSound } from './audio/sound'
 
 export class Game {
   trainArray: Train[] = []
@@ -63,6 +64,8 @@ export class Game {
     this.totalTrainCount += 1
     if (train.colorMatchesStation()) {
       this.goodTrainCount += 1
+    } else {
+      errorSound.play()
     }
     this.writeText(`${this.goodTrainCount} / ${this.totalTrainCount}`)
     if (this.totalTrainCount === this.grid.balls.amount) {
