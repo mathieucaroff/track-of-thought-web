@@ -18,9 +18,20 @@
       padding: 0;
     }
 
+    canvas {
+      opacity: 0;
+    }
+
+    canvas.visible {
+      opacity: 1;
+      transition: opacity 0.5s;
+    }
+
     .levelSelectionDiv {
       max-width: 900px;
       margin: auto;
+      opacity: 1;
+      transition: opacity 0.5s;
     }
 
     .levelSelectionButton {

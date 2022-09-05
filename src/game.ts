@@ -130,7 +130,7 @@ export class Game {
       this.goodTrainCount += 1
     } else {
       if (this.option.errorSound) {
-        errorSound.play()
+        errorSound().play()
       }
     }
     this.score.text = `${this.goodTrainCount} / ${this.totalTrainCount} (-${

@@ -19,21 +19,24 @@ let levelPicker = (prop: { next: () => void }) => {
     return
   }
 
-  let levelPickerDiv = create('div', { className: 'levelSelectionDiv' }, [
+  let levelSelectionDiv = create('div', { className: 'levelSelectionDiv' }, [
     create('h1', { textContent: 'Select a level' }),
   ])
-  document.body.appendChild(levelPickerDiv)
+  document.body.appendChild(levelSelectionDiv)
 
   Object.keys(importerObject).forEach((levelNumber) => {
-    levelPickerDiv.appendChild(
+    levelSelectionDiv.appendChild(
       create('button', {
         textContent: levelNumber,
         className: 'levelSelectionButton',
         onclick: () => {
-          document.body.removeChild(levelPickerDiv)
-          search.set('level', levelNumber)
-          history.pushState({}, '', '?' + search)
-          next()
+          levelSelectionDiv.style.opacity = '0%'
+          levelSelectionDiv.addEventListener('transitionend', () => {
+            document.body.removeChild(levelSelectionDiv)
+            search.set('level', levelNumber)
+            history.pushState({}, '', '?' + search)
+            next()
+          })
         },
       }),
     )
@@ -73,6 +76,10 @@ let initGame = async () => {
   app.renderer.backgroundColor = BACKGROUND_COLOR
 
   document.body.appendChild(app.view)
+  window.getComputedStyle(app.view).opacity // this forces a flush of the style
+  setTimeout(() => {
+    app.view.className = 'visible'
+  })
 
   let param = new URLSearchParams(location.search)
   let levelNumber: string | undefined = undefined
@@ -171,7 +178,7 @@ let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) =
 
       let switchTrack = () => {
         ;[track.end1, track.end2] = [track.end2, track.end1]
-        clickSound.play()
+        clickSound().play()
         drawSwitch(SWITCH_HOVER_COLOR)
       }
 
