@@ -4,6 +4,10 @@ import { colorNameToNumber, randomPick } from './util'
 import { Grid } from './grid'
 import { errorSound } from './audio/sound'
 
+export interface GameOption {
+  errorSound: boolean
+}
+
 export class Game {
   trainArray: Train[] = []
   startTimeArray: number[]
@@ -11,7 +15,7 @@ export class Game {
   totalTrainCount = 0
   goodTrainCount = 0
   score: pixi.Text
-  constructor(public app: pixi.Application, public grid: Grid) {
+  constructor(public app: pixi.Application, public grid: Grid, public option: GameOption) {
     let length = grid.balls.amount
     this.startTimeArray = Array.from({ length }, (_, k) => {
       return (k / length) * 100 * 1000 // spread the train's start time over the course of 100 seconds
@@ -65,7 +69,9 @@ export class Game {
     if (train.colorMatchesStation()) {
       this.goodTrainCount += 1
     } else {
-      errorSound.play()
+      if (this.option.errorSoundEnabled) {
+        errorSound.play()
+      }
     }
     this.writeText(
       `${this.goodTrainCount} / ${this.totalTrainCount} (-${

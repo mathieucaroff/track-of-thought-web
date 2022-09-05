@@ -1,18 +1,47 @@
 import * as pixi from 'pixi.js'
+import { default as packageJson } from '../package.json'
+import { clickSound } from './audio/sound'
 import { BACKGROUND_COLOR, SQUARE_WIDTH, SWITCH_COLOR, SWITCH_HOVER_COLOR } from './constants'
 import { Game } from './game'
 import * as graphics from './graphics'
 import { createGrid, Grid } from './grid'
 import { importerObject } from './level/importerObject'
+import { create } from './lib/create'
 import { githubCornerHTML } from './lib/githubCorner'
 import { Direction } from './type'
-import { colorNameToNumber, randomPick, addPosition, isStraight } from './util'
-import { default as packageJson } from '../package.json'
-import './audio/sound.ts'
-import { clickSound } from './audio/sound'
+import { addPosition, colorNameToNumber, isStraight, randomPick } from './util'
 
 let app: pixi.Application
 let speedFactor = 1
+
+let levelPicker = (prop: { next: () => void }) => {
+  let { next } = prop
+  let search = new URLSearchParams(location.search)
+  if (importerObject[(search.get('level') ?? '').split('-')[0]]) {
+    next()
+    return
+  }
+
+  let levelPickerDiv = create('div', { className: 'levelSelectionDiv' }, [
+    create('h1', { textContent: 'Select a level' }),
+  ])
+  document.body.appendChild(levelPickerDiv)
+
+  Object.keys(importerObject).forEach((levelNumber) => {
+    levelPickerDiv.appendChild(
+      create('button', {
+        textContent: levelNumber,
+        className: 'levelSelectionButton',
+        onclick: () => {
+          document.body.removeChild(levelPickerDiv)
+          search.set('level', levelNumber)
+          history.pushState({}, '', '?' + search)
+          next()
+        },
+      }),
+    )
+  })
+}
 
 let importLevel = (prop: { levelNumber?: string; alternativeNumber?: string } = {}) => {
   if (!prop.levelNumber) {
@@ -26,9 +55,7 @@ let importLevel = (prop: { levelNumber?: string; alternativeNumber?: string } = 
   return alternativeImporterObject[prop.alternativeNumber]()
 }
 
-let init = async () => {
-  document.body.innerHTML += githubCornerHTML(packageJson.repository, packageJson.version)
-
+let initGame = async () => {
   let type = 'WebGL'
   if (!pixi.utils.isWebGLSupported()) {
     type = 'canvas'
@@ -73,7 +100,14 @@ let init = async () => {
     }
   })
 
-  return grid
+  let search = new URLSearchParams(location.search)
+
+  addTracks(grid)
+  addStations(grid)
+  let game = new Game(app, grid, { errorSound: search.has('errorSound') })
+  pixi.Ticker.shared.add(() => {
+    game.update(pixi.Ticker.shared.elapsedMS * speedFactor)
+  })
 }
 
 let simpleTrack = (start: Direction, end: Direction) => {
@@ -170,14 +204,14 @@ let addStations = (grid: Grid) => {
   app.stage.addChild(g)
 }
 
-let main = async () => {
-  let grid = await init()
-  addTracks(grid)
-  addStations(grid)
-  let game = new Game(app, grid)
-  pixi.Ticker.shared.add(() => {
-    game.update(pixi.Ticker.shared.elapsedMS * speedFactor)
+let main = () => {
+  document.documentElement.style.backgroundColor = '#' + BACKGROUND_COLOR.toString(16)
+
+  document.body.innerHTML += githubCornerHTML(packageJson.repository, packageJson.version)
+  window.addEventListener('popstate', (event) => {
+    location.reload()
   })
+  levelPicker({ next: initGame })
 }
 
 main()
