@@ -17,7 +17,12 @@ export class Game {
   goodTrainCount = 0
   score: pixi.Text
   finalText: pixi.Text
-  constructor(public stage: pixi.Container, public grid: Grid, public option: GameOption) {
+  constructor(
+    public stage: pixi.Container,
+    public grid: Grid,
+    public canvas: HTMLCanvasElement,
+    public option: GameOption,
+  ) {
     let length = grid.balls.amount
     this.startTimeArray = Array.from({ length }, (_, k) => {
       return (k / length) * 100 * 1000 // spread the train's start time over the course of 100 seconds
@@ -45,6 +50,32 @@ export class Game {
 
     stage.addChild(scoreBackground)
     stage.addChild(this.score)
+
+    // Button back
+    let buttonBack = new pixi.Text('⮌', {
+      fill: '#c7b59d',
+      fontSize: 35,
+    })
+    buttonBack.x = 235
+    buttonBack.y = -60
+    let buttonBackBackground = new pixi.Graphics()
+    scoreBackground.beginFill(0x4b494a)
+    scoreBackground.drawRect(190, -20, 60, 60)
+    buttonBackBackground.interactive = true
+    buttonBackBackground.hitArea = new pixi.Rectangle(215, -70, 70, 60)
+    let goBack = () => {
+      location.search = ''
+    }
+    buttonBackBackground.on('mousedown', goBack)
+    buttonBackBackground.on('tap', goBack)
+    buttonBackBackground.on('mouseover', () => {
+      this.canvas.style.cursor = 'pointer'
+    })
+    buttonBackBackground.on('mouseout', () => {
+      this.canvas.style.cursor = 'inherit'
+    })
+    stage.addChild(buttonBack)
+    stage.addChild(buttonBackBackground)
 
     // Final text
     this.finalText = new pixi.Text(

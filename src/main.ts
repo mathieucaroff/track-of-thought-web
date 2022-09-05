@@ -105,7 +105,7 @@ let initGame = async () => {
   app.stage.addChild(stage)
   addTracks(grid, app.view, stage)
   addStations(grid, stage)
-  let game = new Game(stage, grid, { errorSound: search.has('errorSound') })
+  let game = new Game(stage, grid, app.view, { errorSound: search.has('errorSound') })
   pixi.Ticker.shared.add(() => {
     game.update(pixi.Ticker.shared.elapsedMS * speedFactor)
   })
@@ -177,14 +177,14 @@ let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) =
 
       ;(g as any).on('mousedown', switchTrack)
       ;(g as any).on('tap', switchTrack)
-      ;(g as any).mouseover = () => {
+      ;(g as any).on('mouseover', () => {
         canvas.style.cursor = 'pointer'
         drawSwitch(SWITCH_HOVER_COLOR)
-      }
-      ;(g as any).mouseout = () => {
+      })
+      ;(g as any).on('mouseout', () => {
         canvas.style.cursor = 'inherit'
         drawSwitch(SWITCH_COLOR)
-      }
+      })
     }
     g = simpleTrack(track.start, track.end1)
     addPosition(g, track)
