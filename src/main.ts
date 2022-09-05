@@ -11,9 +11,6 @@ import { githubCornerHTML } from './lib/githubCorner'
 import { Direction } from './type'
 import { addPosition, colorNameToNumber, isStraight, randomPick } from './util'
 
-let app: pixi.Application
-let speedFactor = 1
-
 let levelPicker = (prop: { next: () => void }) => {
   let { next } = prop
   let search = new URLSearchParams(location.search)
@@ -63,7 +60,8 @@ let initGame = async () => {
 
   pixi.utils.sayHello(type)
 
-  app = new pixi.Application({})
+  let app = new pixi.Application({})
+  let speedFactor = 1
 
   // size
   let resize = () => {
@@ -102,9 +100,12 @@ let initGame = async () => {
 
   let search = new URLSearchParams(location.search)
 
-  addTracks(grid)
-  addStations(grid)
-  let game = new Game(app, grid, { errorSound: search.has('errorSound') })
+  let stage = new pixi.Container()
+  stage.y = SQUARE_WIDTH
+  app.stage.addChild(stage)
+  addTracks(grid, app.view, stage)
+  addStations(grid, stage)
+  let game = new Game(stage, grid, { errorSound: search.has('errorSound') })
   pixi.Ticker.shared.add(() => {
     game.update(pixi.Ticker.shared.elapsedMS * speedFactor)
   })
@@ -139,7 +140,7 @@ let simpleTrack = (start: Direction, end: Direction) => {
   }
 }
 
-let addTracks = (grid: Grid) => {
+let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) => {
   // draw tracks and fill the switchArray
   grid.tracks.forEach((track) => {
     let result = new pixi.Container()
@@ -177,31 +178,31 @@ let addTracks = (grid: Grid) => {
       ;(g as any).on('mousedown', switchTrack)
       ;(g as any).on('tap', switchTrack)
       ;(g as any).mouseover = () => {
-        app.view.style.cursor = 'pointer'
+        canvas.style.cursor = 'pointer'
         drawSwitch(SWITCH_HOVER_COLOR)
       }
       ;(g as any).mouseout = () => {
-        app.view.style.cursor = 'inherit'
+        canvas.style.cursor = 'inherit'
         drawSwitch(SWITCH_COLOR)
       }
     }
     g = simpleTrack(track.start, track.end1)
     addPosition(g, track)
     result.addChild(g)
-    app.stage.addChild(result)
+    stage.addChild(result)
   })
 }
 
-let addStations = (grid: Grid) => {
+let addStations = (grid: Grid, stage: pixi.Container) => {
   // draw stations
   grid.stations.forEach((entry) => {
     let g = graphics.station(colorNameToNumber(entry.color) ?? 0x222222)
     addPosition(g, entry)
-    app.stage.addChild(g)
+    stage.addChild(g)
   })
   let g = graphics.station(colorNameToNumber(grid.start.color) ?? 0x222222)
   addPosition(g, grid.start)
-  app.stage.addChild(g)
+  stage.addChild(g)
 }
 
 let main = () => {
