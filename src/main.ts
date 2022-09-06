@@ -8,14 +8,14 @@ import { createGrid, Grid } from './grid'
 import { importerObject } from './level/importerObject'
 import { create } from './lib/create'
 import { githubCornerHTML } from './lib/githubCorner'
-import { Direction } from './type'
+import { Direction, LevelObject } from './type'
 import { addPosition, colorNameToNumber, isStraight, randomPick } from './util'
 
-let levelPicker = (prop: { next: () => void }) => {
-  let { next } = prop
+let levelPicker = (prop: { initGame: (a: Promise<LevelObject>) => void }) => {
+  let { initGame } = prop
   let search = new URLSearchParams(location.search)
   if (importerObject[(search.get('level') ?? '').split('-')[0]]) {
-    next()
+    initGame(loadLevel())
     return
   }
 
@@ -30,12 +30,14 @@ let levelPicker = (prop: { next: () => void }) => {
         textContent: levelNumber,
         className: 'levelSelectionButton',
         onclick: () => {
+          let levelPromise = loadLevel(levelNumber)
+
           levelSelectionDiv.style.opacity = '0%'
           levelSelectionDiv.addEventListener('transitionend', () => {
             document.body.removeChild(levelSelectionDiv)
             search.set('level', levelNumber)
             history.pushState({}, '', '?' + search)
-            next()
+            initGame(levelPromise)
           })
         },
       }),
@@ -55,7 +57,18 @@ let importLevel = (prop: { levelNumber?: string; alternativeNumber?: string } = 
   return alternativeImporterObject[prop.alternativeNumber]()
 }
 
-let initGame = async () => {
+let loadLevel = async (levelNumber?: string) => {
+  let param = new URLSearchParams(location.search)
+  let alternativeNumber: string | undefined = undefined
+  if (param.has('level')) {
+    ;[levelNumber, alternativeNumber] = param.get('level')!.split('-')
+  }
+  let levelContent = await importLevel({ levelNumber, alternativeNumber })
+  console.log('levelContent', levelContent)
+  return levelContent
+}
+
+let initGame = async (levelPromise: Promise<LevelObject>) => {
   let type = 'WebGL'
   if (!pixi.utils.isWebGLSupported()) {
     type = 'canvas'
@@ -76,19 +89,9 @@ let initGame = async () => {
   app.renderer.backgroundColor = BACKGROUND_COLOR
 
   document.body.appendChild(app.view)
-  setTimeout(() => {
-    app.view.className = 'visible'
-  })
-
-  let param = new URLSearchParams(location.search)
-  let levelNumber: string | undefined = undefined
-  let alternativeNumber: string | undefined = undefined
-  if (param.has('level')) {
-    ;[levelNumber, alternativeNumber] = param.get('level')!.split('-')
-  }
-  let levelContent = await importLevel({ levelNumber, alternativeNumber })
-
-  console.log('levelContent', levelContent)
+  let levelContent = await levelPromise
+  window.getComputedStyle(app.view).opacity
+  app.view.className = 'visible'
 
   let grid = createGrid(levelContent)
 
@@ -218,7 +221,7 @@ let main = () => {
   window.addEventListener('popstate', (event) => {
     location.reload()
   })
-  levelPicker({ next: initGame })
+  levelPicker({ initGame })
 }
 
 main()
