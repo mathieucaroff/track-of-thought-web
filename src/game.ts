@@ -3,7 +3,7 @@ import { Train } from './train'
 import { colorNameToNumber, randomPick } from './util'
 import { Grid } from './grid'
 import { errorSound } from './audio/sound'
-import { SQUARE_WIDTH } from './constants'
+import { SCORE_BACKGROUND_COLOR, SQUARE_WIDTH } from './constants'
 
 export interface GameOption {
   errorSound: boolean
@@ -17,6 +17,7 @@ export class Game {
   goodTrainCount = 0
   score: pixi.Text
   finalText: pixi.Text
+  finalBackground: pixi.Graphics
   constructor(
     public stage: pixi.Container,
     public grid: Grid,
@@ -40,7 +41,7 @@ export class Game {
     this.score.anchor.set(0.5)
 
     let scoreBackground = new pixi.Graphics()
-    scoreBackground.beginFill(0x4b494a)
+    scoreBackground.beginFill(SCORE_BACKGROUND_COLOR)
     scoreBackground.drawRect(-10, -20, 185, 60)
 
     scoreBackground.x = 30
@@ -91,6 +92,8 @@ export class Game {
     this.finalText.anchor.set(0.5)
     this.finalText.x = 480
     this.finalText.y = 300
+    this.finalBackground = new pixi.Graphics()
+    stage.addChild(this.finalBackground)
     stage.addChild(this.finalText)
   }
   update(elapsedMS: number) {
@@ -143,6 +146,8 @@ export class Game {
 
   reportUserResult() {
     let diff = this.goodTrainCount - this.totalTrainCount
+    this.finalBackground.beginFill(SCORE_BACKGROUND_COLOR)
+    this.finalBackground.drawRect(250, 210, 460, 180)
     this.finalText.text = this.score.text
     if (diff === 0) {
       this.finalText.text += '\nPerfect score!'

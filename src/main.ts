@@ -76,7 +76,6 @@ let initGame = async () => {
   app.renderer.backgroundColor = BACKGROUND_COLOR
 
   document.body.appendChild(app.view)
-  window.getComputedStyle(app.view).opacity // this forces a flush of the style
   setTimeout(() => {
     app.view.className = 'visible'
   })

@@ -13,3 +13,4 @@ export const SWITCH_COLOR = 0x4b494a
 export const SWITCH_HOVER_COLOR = 0x9b999a
 export const SWITCH_OUTLINE_WIDTH = 2
 export const SWITCH_OUTLINE_COLOR = 0xdddddd
+export const SCORE_BACKGROUND_COLOR = 0x4b494a
