@@ -180,7 +180,7 @@ let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) =
 
       let switchTrack = () => {
         ;[track.end1, track.end2] = [track.end2, track.end1]
-        clickSound().play()
+        clickSound.play()
         drawSwitch(SWITCH_HOVER_COLOR)
       }
 
