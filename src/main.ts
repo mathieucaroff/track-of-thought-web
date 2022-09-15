@@ -108,13 +108,15 @@ let initGame = async (levelPromise: Promise<LevelObject>) => {
   })
 
   let search = new URLSearchParams(location.search)
+  let enablePattern = search.has('pattern')
+  let errorSound = search.has('errorSound')
 
   let stage = new pixi.Container()
   stage.y = SQUARE_WIDTH
   app.stage.addChild(stage)
   addTracks(grid, app.view, stage)
-  addStations(grid, stage)
-  let game = new Game(stage, grid, app.view, { errorSound: search.has('errorSound') })
+  addStations(grid, stage, enablePattern)
+  let game = new Game(stage, grid, app.view, { errorSound, enablePattern })
   pixi.Ticker.shared.add(() => {
     game.update(pixi.Ticker.shared.elapsedMS * speedFactor)
   })
@@ -202,14 +204,15 @@ let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) =
   })
 }
 
-let addStations = (grid: Grid, stage: pixi.Container) => {
+let addStations = (grid: Grid, stage: pixi.Container, enablePattern: boolean) => {
   // draw stations
   grid.stations.forEach((entry) => {
-    let g = graphics.station(colorNameToNumber(entry.color) ?? 0x222222)
+    let hasPattern = enablePattern && entry.color.endsWith(' + o')
+    let g = graphics.station(colorNameToNumber(entry.color) ?? 0x222222, hasPattern)
     addPosition(g, entry)
     stage.addChild(g)
   })
-  let g = graphics.station(colorNameToNumber(grid.start.color) ?? 0x222222)
+  let g = graphics.station(colorNameToNumber(grid.start.color) ?? 0x222222, false)
   addPosition(g, grid.start)
   stage.addChild(g)
 }

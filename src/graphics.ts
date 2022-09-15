@@ -11,6 +11,9 @@ import {
   SWITCH_OUTLINE_COLOR,
   SWITCH_OUTLINE_WIDTH,
 } from './constants'
+import patternImageUrl from 'url:../asset/pattern/pattern.png'
+
+const pattern = pixi.Texture.from(patternImageUrl)
 
 export function roadTurn() {
   let g = new pixi.Graphics()
@@ -58,7 +61,7 @@ export function road() {
   return g
 }
 
-export function station(color: number) {
+export function station(color: number, hasPattern: boolean) {
   let g = new pixi.Graphics()
   g.beginFill(0xffffff)
   g.drawRect(0, 0, SQUARE_WIDTH, SQUARE_WIDTH)
@@ -70,17 +73,35 @@ export function station(color: number) {
     SQUARE_WIDTH - 2 * SQUARE_BORDER,
   )
   g.endFill()
-  return g
+  let h = new pixi.Container()
+  h.addChild(g)
+  if (hasPattern) {
+    let s = new pixi.TilingSprite(pattern, 60, 60)
+    s.tileScale.x = 0.2
+    s.tileScale.y = 0.2
+    h.addChild(s)
+  }
+  return h
 }
 
-export function train(color: number) {
+export function train(color: number, hasPattern: boolean) {
   let g = new pixi.Graphics()
   g.beginFill(0xffffff)
   g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, ROAD_WIDTH / 2)
   g.beginFill(color)
   g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, INTERIOR_ROAD_WIDTH / 2)
   g.endFill()
-  return g
+  let h = new pixi.Container()
+  h.addChild(g)
+  if (hasPattern) {
+    let s = new pixi.TilingSprite(pattern, 24, 24)
+    s.tileScale.x = 0.2
+    s.tileScale.y = 0.2
+    s.x += 20
+    s.y += 20
+    h.addChild(s)
+  }
+  return h
 }
 
 export function switchCircle(circleColor: number) {

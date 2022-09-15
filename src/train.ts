@@ -18,9 +18,10 @@ export class Train {
     public gridPosition: GridPosition,
     public progress: number,
     public color: number,
+    public hasPattern: boolean,
     public running: boolean,
   ) {
-    this.g = graphics.train(color)
+    this.g = graphics.train(color, hasPattern)
     setPosition(this.g, gridPosition)
   }
   update(elapsedMS: number) {
@@ -82,17 +83,17 @@ export class Train {
 
   // Handle updating the position of the train provided that start and exit are at a 90° angle
   handleTurnPositionUpdate(start: Direction, exit: Direction) {
-    let from = Math.sin((this.progress * Math.PI) / 2)
-    let to = Math.cos((this.progress * Math.PI) / 2)
-    if (start === 'left') this.g.x += ((from - 1) * SQUARE_WIDTH) / 2
-    if (start === 'right') this.g.x -= ((from - 1) * SQUARE_WIDTH) / 2
-    if (start === 'bottom') this.g.y += ((1 - from) * SQUARE_WIDTH) / 2
-    if (start === 'top') this.g.y -= ((1 - from) * SQUARE_WIDTH) / 2
+    let from = ((Math.sin((this.progress * Math.PI) / 2) - 1) * SQUARE_WIDTH) / 2
+    let to = ((Math.cos((this.progress * Math.PI) / 2) - 1) * SQUARE_WIDTH) / 2
+    if (start === 'top') this.g.y += from
+    if (start === 'left') this.g.x += from
+    if (start === 'right') this.g.x -= from
+    if (start === 'bottom') this.g.y -= from
 
-    if (exit === 'left') this.g.x += ((to - 1) * SQUARE_WIDTH) / 2
-    if (exit === 'right') this.g.x -= ((to - 1) * SQUARE_WIDTH) / 2
-    if (exit === 'bottom') this.g.y += ((1 - to) * SQUARE_WIDTH) / 2
-    if (exit === 'top') this.g.y -= ((1 - to) * SQUARE_WIDTH) / 2
+    if (exit === 'top') this.g.y += to
+    if (exit === 'left') this.g.x += to
+    if (exit === 'right') this.g.x -= to
+    if (exit === 'bottom') this.g.y -= to
   }
 
   // next -- move the train to the next square

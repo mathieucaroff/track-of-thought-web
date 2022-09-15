@@ -7,6 +7,7 @@ import { SCORE_BACKGROUND_COLOR, SQUARE_WIDTH } from './constants'
 
 export interface GameOption {
   errorSound: boolean
+  enablePattern: boolean
 }
 
 export class Game {
@@ -100,11 +101,13 @@ export class Game {
     this.elapsedTimeMs += elapsedMS
     while (this.startTimeArray.length > 0 && this.startTimeArray[0] < this.elapsedTimeMs) {
       this.startTimeArray.shift()
+      let colorName = randomPick(this.grid.stations).color
       let train = new Train(
         this.grid,
         { ...this.grid.start },
         0.5,
-        colorNameToNumber(randomPick(this.grid.stations).color) || 0,
+        colorNameToNumber(colorName) || 0,
+        this.option.enablePattern && colorName.endsWith(' + o'),
         true,
       )
       this.trainArray.push(train)
