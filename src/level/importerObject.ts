@@ -5,8 +5,9 @@ let importerObject: ImporterObject = {}
 
 Object.entries(pathGroup).forEach(([name, importer]) => {
   let [levelNumber, alternativeNumber] = name.split('-')
-  importerObject[+levelNumber] = importerObject[levelNumber] || {}
-  importerObject[+levelNumber][alternativeNumber] = importer as any as () => Promise<LevelObject>
+  let n = +levelNumber
+  importerObject[n] = importerObject[n] || {}
+  importerObject[n][alternativeNumber] = importer as any as () => Promise<LevelObject>
 })
 
 export { importerObject }
