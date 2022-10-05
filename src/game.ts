@@ -3,7 +3,7 @@ import { Train } from './train'
 import { colorNameToNumber, randomPick } from './util'
 import { Grid } from './grid'
 import { errorSound } from './audio/sound'
-import { SCORE_BACKGROUND_COLOR, SQUARE_WIDTH } from './constants'
+import { SCORE_BACKGROUND_COLOR, SQUARE_WIDTH, SW } from './constants'
 
 export interface GameOption {
   errorSound: boolean
@@ -37,18 +37,19 @@ export class Game {
       new pixi.TextStyle({
         fill: '#c7b59d',
         fontFamily: 'Arial',
+        fontSize: 35 * SW,
       }),
     )
     this.score.anchor.set(0.5)
 
     let scoreBackground = new pixi.Graphics()
     scoreBackground.beginFill(SCORE_BACKGROUND_COLOR)
-    scoreBackground.drawRect(-10, -20, 185, 60)
+    scoreBackground.drawRect(-10 * SW, -20 * SW, 185 * SW, 60 * SW)
 
-    scoreBackground.x = 30
-    scoreBackground.y = -SQUARE_WIDTH + 10
-    this.score.x = 110
-    this.score.y = -SQUARE_WIDTH + 24
+    scoreBackground.x = 30 * SW
+    scoreBackground.y = -SQUARE_WIDTH + 10 * SW
+    this.score.x = 110 * SW
+    this.score.y = -SQUARE_WIDTH + 24 * SW
 
     stage.addChild(scoreBackground)
     stage.addChild(this.score)
@@ -56,15 +57,15 @@ export class Game {
     // Button back
     let buttonBack = new pixi.Text('⮌', {
       fill: '#c7b59d',
-      fontSize: 35,
+      fontSize: 35 * SW,
     })
-    buttonBack.x = 235
-    buttonBack.y = -60
+    buttonBack.x = 235 * SW
+    buttonBack.y = -60 * SW
     let buttonBackBackground = new pixi.Graphics()
     scoreBackground.beginFill(0x4b494a)
-    scoreBackground.drawRect(190, -20, 60, 60)
+    scoreBackground.drawRect(190 * SW, -20 * SW, 60 * SW, 60 * SW)
     buttonBackBackground.interactive = true
-    buttonBackBackground.hitArea = new pixi.Rectangle(215, -70, 70, 60)
+    buttonBackBackground.hitArea = new pixi.Rectangle(215 * SW, -70 * SW, 70 * SW, 60 * SW)
     let goBack = () => {
       location.search = ''
     }
@@ -85,14 +86,14 @@ export class Game {
       new pixi.TextStyle({
         fill: '#c7b59d',
         fontFamily: 'Arial',
-        fontSize: 60,
-        strokeThickness: 5,
+        fontSize: 60 * SW,
+        strokeThickness: 5 * SW,
         align: 'center',
       }),
     )
     this.finalText.anchor.set(0.5)
-    this.finalText.x = 480
-    this.finalText.y = 300
+    this.finalText.x = 480 * SW
+    this.finalText.y = 300 * SW
     this.finalBackground = new pixi.Graphics()
     stage.addChild(this.finalBackground)
     stage.addChild(this.finalText)
@@ -150,7 +151,7 @@ export class Game {
   reportUserResult() {
     let diff = this.goodTrainCount - this.totalTrainCount
     this.finalBackground.beginFill(SCORE_BACKGROUND_COLOR)
-    this.finalBackground.drawRect(250, 210, 460, 180)
+    this.finalBackground.drawRect(250 * SW, 210 * SW, 460 * SW, 180 * SW)
     this.finalText.text = this.score.text
     if (diff === 0) {
       this.finalText.text += '\nPerfect score!'

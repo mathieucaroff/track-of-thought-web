@@ -6,7 +6,7 @@ import { Direction, GridPosition } from './type'
 import { colorNameToNumber, oppositeOf, setPosition } from './util'
 
 export class Train {
-  g: pixi.Graphics
+  g: pixi.Container
   /**
    *
    * @param gridPosition Coordinates of the tile of the grid which is being hovered

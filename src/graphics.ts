@@ -8,6 +8,7 @@ import {
   ROAD_WIDTH,
   SQUARE_BORDER,
   SQUARE_WIDTH,
+  SW,
   SWITCH_OUTLINE_COLOR,
   SWITCH_OUTLINE_WIDTH,
 } from './constants'
@@ -94,11 +95,11 @@ export function train(color: number, hasPattern: boolean) {
   let h = new pixi.Container()
   h.addChild(g)
   if (hasPattern) {
-    let s = new pixi.TilingSprite(pattern, 24, 24)
-    s.tileScale.x = 0.2
-    s.tileScale.y = 0.2
-    s.x += 20
-    s.y += 20
+    let s = new pixi.TilingSprite(pattern, 24 * SW, 24 * SW)
+    s.tileScale.x = 0.2 * SW
+    s.tileScale.y = 0.2 * SW
+    s.x += 20 * SW
+    s.y += 20 * SW
     h.addChild(s)
   }
   return h

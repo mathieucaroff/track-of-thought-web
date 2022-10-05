@@ -1,10 +1,12 @@
-export const SQUARE_WIDTH = 64 // px
+export const SQUARE_WIDTH = location.search.includes('phone') ? 24 : 64 // px
 
-export const SQUARE_BORDER = 4
+export const SW = SQUARE_WIDTH / 64
+
+export const SQUARE_BORDER = SQUARE_WIDTH / 16
 
 export const BACKGROUND_COLOR = 0x2d2e37
-export const ROAD_WIDTH = 32
-export const INTERIOR_ROAD_WIDTH = 24
+export const ROAD_WIDTH = SQUARE_WIDTH * 0.5
+export const INTERIOR_ROAD_WIDTH = SQUARE_WIDTH * 0.375
 export const ROAD_HOLE = (SQUARE_WIDTH - ROAD_WIDTH) / 2
 export const ROAD_BORDER = (ROAD_WIDTH - INTERIOR_ROAD_WIDTH) / 2
 export const PAVEMENT_COLOR = 0xb0b0b0
