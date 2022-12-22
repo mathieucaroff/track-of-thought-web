@@ -1,7 +1,7 @@
 import * as pixi from 'pixi.js'
 import { Train } from './train'
 import { colorNameToNumber, randomPick } from './util'
-import { Grid } from './grid'
+import { Grid } from './type'
 import { errorSound } from './audio/sound'
 import { SCORE_BACKGROUND_COLOR, SQUARE_WIDTH, SW } from './constants'
 

@@ -1,14 +1,20 @@
 import * as pixi from 'pixi.js'
 import { default as packageJson } from '../package.json'
 import { clickSound } from './audio/sound'
-import { BACKGROUND_COLOR, SQUARE_WIDTH, SWITCH_COLOR, SWITCH_HOVER_COLOR } from './constants'
+import {
+  BACKGROUND_COLOR,
+  SQUARE_WIDTH,
+  SWITCH_COLOR,
+  SWITCH_HOVER_COLOR,
+  SWITCH_WITH_TRAIN_COLOR,
+} from './constants'
 import { Game } from './game'
 import * as graphics from './graphics'
-import { createGrid, Grid } from './grid'
+import { createGrid } from './grid'
 import { importerObject } from './level/importerObject'
 import { create } from './lib/create'
 import { githubCornerHTML } from './lib/githubCorner'
-import { Direction, LevelObject } from './type'
+import { Direction, Grid, LevelObject } from './type'
 import { addPosition, colorNameToNumber, isStraight, randomPick } from './util'
 
 let levelPicker = (prop: { initGame: (a: Promise<LevelObject>) => void }) => {
@@ -183,18 +189,37 @@ let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) =
       let switchTrack = () => {
         ;[track.end1, track.end2] = [track.end2, track.end1]
         clickSound.play()
-        drawSwitch(SWITCH_HOVER_COLOR)
+        if (track.trainCount > 0) {
+          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
+        } else {
+          drawSwitch(SWITCH_HOVER_COLOR)
+        }
       }
 
+      track.redraw = () => {
+        if (track.trainCount > 0) {
+          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
+        } else {
+          drawSwitch(SWITCH_COLOR)
+        }
+      }
       ;(g as any).on('mousedown', switchTrack)
       ;(g as any).on('tap', switchTrack)
       ;(g as any).on('mouseover', () => {
         canvas.style.cursor = 'pointer'
-        drawSwitch(SWITCH_HOVER_COLOR)
+        if (track.trainCount > 0) {
+          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
+        } else {
+          drawSwitch(SWITCH_HOVER_COLOR)
+        }
       })
       ;(g as any).on('mouseout', () => {
         canvas.style.cursor = 'inherit'
-        drawSwitch(SWITCH_COLOR)
+        if (track.trainCount > 0) {
+          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
+        } else {
+          drawSwitch(SWITCH_COLOR)
+        }
       })
     }
     g = simpleTrack(track.start, track.end1)

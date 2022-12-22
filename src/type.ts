@@ -24,10 +24,17 @@ export interface LevelObject {
   tracks: TrackEntry[]
 }
 
+export interface Grid extends LevelObject {
+  content: (TrackEntry | StationEntry | undefined)[][]
+  start: StationEntry
+}
+
 export interface StationEntry extends GridPosition {
   type: 'start' | 'normal'
   exit: Direction
   color: string
+  trainCount: number
+  redraw?: () => void
 }
 
 export interface TrackEntry extends GridPosition {
@@ -37,6 +44,8 @@ export interface TrackEntry extends GridPosition {
   end2: Direction
   color: string
   switch: 'true' | 'false'
+  trainCount: number
+  redraw?: () => void
 }
 
 export interface ImporterObject {

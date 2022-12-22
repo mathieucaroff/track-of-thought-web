@@ -1,8 +1,8 @@
+import { type } from 'os'
 import * as pixi from 'pixi.js'
 import { SQUARE_WIDTH } from './constants'
 import * as graphics from './graphics'
-import { Grid } from './grid'
-import { Direction, GridPosition } from './type'
+import { Direction, Grid, GridPosition, TrackEntry } from './type'
 import { colorNameToNumber, oppositeOf, setPosition } from './util'
 
 export class Train {
@@ -30,7 +30,9 @@ export class Train {
     }
     this.progress += elapsedMS / 1000
     while (this.progress > 1) {
+      this.releaseTile()
       this.next()
+      this.occupyTile()
       if (!this.running) {
         return
       }
@@ -62,6 +64,20 @@ export class Train {
     }
 
     this.handlePositionUpdate(start, exit)
+  }
+
+  releaseTile() {
+    let { row, column } = this.gridPosition
+    let entry = this.grid.content[row][column]
+    entry!.trainCount -= 1
+    entry!.redraw?.()
+  }
+
+  occupyTile() {
+    let { row, column } = this.gridPosition
+    let entry = this.grid.content[row][column]
+    entry!.trainCount += 1
+    entry!.redraw?.()
   }
 
   // Handle updating the position of the train
