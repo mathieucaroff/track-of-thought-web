@@ -6,11 +6,13 @@ import {
   ROAD_BORDER,
   ROAD_HOLE,
   ROAD_WIDTH,
-  SQUARE_BORDER,
+  STATION_BORDER,
   SQUARE_WIDTH,
   SW,
   SWITCH_OUTLINE_COLOR,
   SWITCH_OUTLINE_WIDTH,
+  SWITCH_RADIUS,
+  STATION_MARGIN,
 } from './constants'
 import patternImageUrl from 'url:../asset/pattern/pattern.png'
 
@@ -65,14 +67,16 @@ export function road() {
 export function station(color: number, hasPattern: boolean) {
   let g = new pixi.Graphics()
   g.beginFill(0xffffff)
-  g.drawRect(0, 0, SQUARE_WIDTH, SQUARE_WIDTH)
-  g.beginFill(color)
   g.drawRect(
-    SQUARE_BORDER,
-    SQUARE_BORDER,
-    SQUARE_WIDTH - 2 * SQUARE_BORDER,
-    SQUARE_WIDTH - 2 * SQUARE_BORDER,
+    STATION_MARGIN,
+    STATION_MARGIN,
+    SQUARE_WIDTH - 2 * STATION_MARGIN,
+    SQUARE_WIDTH - 2 * STATION_MARGIN,
   )
+  g.beginFill(color)
+
+  let offset = STATION_BORDER + STATION_MARGIN
+  g.drawRect(offset, offset, SQUARE_WIDTH - 2 * offset, SQUARE_WIDTH - 2 * offset)
   g.endFill()
   let h = new pixi.Container()
   h.addChild(g)
@@ -108,9 +112,9 @@ export function train(color: number, hasPattern: boolean) {
 export function switchCircle(circleColor: number) {
   let g = new pixi.Graphics()
   g.beginFill(SWITCH_OUTLINE_COLOR)
-  g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2)
+  g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SWITCH_RADIUS)
   g.beginFill(circleColor)
-  g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2 - SWITCH_OUTLINE_WIDTH)
+  g.drawCircle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SWITCH_RADIUS - SWITCH_OUTLINE_WIDTH)
   g.endFill()
   return g
 }

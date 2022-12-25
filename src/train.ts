@@ -2,7 +2,7 @@ import { type } from 'os'
 import * as pixi from 'pixi.js'
 import { SQUARE_WIDTH } from './constants'
 import * as graphics from './graphics'
-import { Direction, Grid, GridPosition, TrackEntry } from './type'
+import { Direction, Grid, GridPosition } from './type'
 import { colorNameToNumber, oppositeOf, setPosition } from './util'
 
 export class Train {
@@ -28,7 +28,7 @@ export class Train {
     if (!this.running) {
       return
     }
-    this.progress += elapsedMS / 1000
+    this.progress += elapsedMS / 1400
     while (this.progress > 1) {
       this.releaseTile()
       this.next()
@@ -75,7 +75,11 @@ export class Train {
 
   occupyTile() {
     let { row, column } = this.gridPosition
-    let entry = this.grid.content[row][column]
+    let entry = this.grid.content[row]?.[column]
+    if (!entry) {
+      console.error('missing entry at', row, column)
+      return
+    }
     entry!.trainCount += 1
     entry!.redraw?.()
   }

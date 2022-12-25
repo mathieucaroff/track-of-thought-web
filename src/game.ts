@@ -44,7 +44,7 @@ export class Game {
 
     let scoreBackground = new pixi.Graphics()
     scoreBackground.beginFill(SCORE_BACKGROUND_COLOR)
-    scoreBackground.drawRect(-10 * SW, -20 * SW, 185 * SW, 60 * SW)
+    scoreBackground.drawRect(-30 * SW, -20 * SW, 225 * SW, 60 * SW)
 
     scoreBackground.x = 30 * SW
     scoreBackground.y = -SQUARE_WIDTH + 10 * SW
@@ -60,12 +60,12 @@ export class Game {
       fontSize: 35 * SW,
     })
     buttonBack.x = 235 * SW
-    buttonBack.y = -60 * SW
+    buttonBack.y = -122 * SW
     let buttonBackBackground = new pixi.Graphics()
     scoreBackground.beginFill(0x4b494a)
     scoreBackground.drawRect(190 * SW, -20 * SW, 60 * SW, 60 * SW)
     buttonBackBackground.interactive = true
-    buttonBackBackground.hitArea = new pixi.Rectangle(215 * SW, -70 * SW, 70 * SW, 60 * SW)
+    buttonBackBackground.hitArea = new pixi.Rectangle(215 * SW, -140 * SW, 70 * SW, 60 * SW)
     let goBack = () => {
       location.search = ''
     }

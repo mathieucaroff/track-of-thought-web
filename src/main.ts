@@ -1,14 +1,18 @@
 import * as pixi from 'pixi.js'
+import { MersenneTwister19937 } from 'random-js'
 import { default as packageJson } from '../package.json'
 import { clickSound } from './audio/sound'
 import {
   BACKGROUND_COLOR,
   SQUARE_WIDTH,
+  STATION_MARGIN,
   SWITCH_COLOR,
   SWITCH_HOVER_COLOR,
   SWITCH_WITH_TRAIN_COLOR,
 } from './constants'
 import { Game } from './game'
+import { generate } from './generator/adapter'
+import { directionToDelta } from './generator/util/direction'
 import * as graphics from './graphics'
 import { createGrid } from './grid'
 import { importerObject } from './level/importerObject'
@@ -20,7 +24,8 @@ import { addPosition, colorNameToNumber, isStraight, randomPick } from './util'
 let levelPicker = (prop: { initGame: (a: Promise<LevelObject>) => void }) => {
   let { initGame } = prop
   let search = new URLSearchParams(location.search)
-  if (importerObject[(search.get('level') ?? '').split('-')[0]]) {
+  let level = (search.get('level') ?? '').split('-')[0]
+  if (search.has('level') && !isNaN(+level)) {
     initGame(loadLevel())
     return
   }
@@ -69,7 +74,18 @@ let loadLevel = async (levelNumber?: string) => {
   if (param.has('level')) {
     ;[levelNumber, alternativeNumber] = param.get('level')!.split('-')
   }
-  let levelContent = await importLevel({ levelNumber, alternativeNumber })
+  let levelContent
+  console.log('param', param)
+  levelContent = generate({
+    // gridSize: { height: 9, width: 14 },
+    gridSize: { height: 5, width: 7 + Math.max(0, Math.floor((+(levelNumber ?? 0) - 9) / 2)) },
+    randomEngine: MersenneTwister19937.seed(2 ** 32 * Math.random()),
+    retryCount: 100_000,
+    sortStationArray: false,
+    stationCount: +levelNumber!,
+    trainCount: 14 + 3 * +levelNumber!,
+  })
+
   console.log('levelContent', levelContent)
   return levelContent
 }
@@ -172,7 +188,9 @@ let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) =
       addPosition(g, track)
       result.addChild(g)
       g.interactive = true
-      g.hitArea = new pixi.Circle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH)
+
+      let param = new URLSearchParams(location.search)
+      g.hitArea = new pixi.Circle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2)
 
       let drawSwitch = (circleColor: number) => {
         let g = simpleTrack(track.start, track.end2)
@@ -236,9 +254,15 @@ let addStations = (grid: Grid, stage: pixi.Container, enablePattern: boolean) =>
     let g = graphics.station(colorNameToNumber(entry.color) ?? 0x222222, hasPattern)
     addPosition(g, entry)
     stage.addChild(g)
+    let { dx, dy } = directionToDelta((entry as any).start)
+    g.x += STATION_MARGIN * dx
+    g.y += STATION_MARGIN * dy
   })
   let g = graphics.station(colorNameToNumber(grid.start.color) ?? 0x222222, false)
   addPosition(g, grid.start)
+  let { dx, dy } = directionToDelta(grid.start.exit)
+  g.x += STATION_MARGIN * dx
+  g.y += STATION_MARGIN * dy
   stage.addChild(g)
 }
 
