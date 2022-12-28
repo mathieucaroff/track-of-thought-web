@@ -27,7 +27,7 @@ export let isStraight = (a: Direction, b: Direction) => {
   return e === 'bottomtop' || e === 'leftright'
 }
 
-export function bestMoveDirectionArray(from: Position, to: Position): Direction[] {
+export function moveDirectionArray(from: Position, to: Position): Direction[] {
   const vector = difference(to, from)
   let directionArray: Direction[] = []
   const topBottom = () => {

@@ -1,30 +1,32 @@
 {
-  "name": "track-of-thought-web",
-  "version": "0.1.0",
+  "name": "track-of-thought-gen",
+  "version": "2.0.0",
   "description": "A game to train diveded attention",
-  "repository": "https://github.com/mathieucaroff/track-of-thought-web",
+  "repository": "https://github.com/mathieucaroff/track-of-thought-gen",
   "author": "Mathieu CAROFF <mathieu.caroff@free.fr>",
   "license": "ISC",
   "scripts": {
-    "build": "node src/level/generate-level-importer.js && parcel build src/index.html",
-    "mcabuild": "node src/level/generate-level-importer.js && parcel build src/index.html --public-url track-of-thought-web.d",
+    "build": "parcel build src/index.html",
+    "mcabuild": "parcel build src/index.html --public-url track-of-thought-gen.d",
     "serve": "parcel src/index.html"
-  },
-  "devDependencies": {
-    "@types/node": "^18.7.14",
-    "buffer": "^6.0.3",
-    "crypto-browserify": "^3.12.0",
-    "events": "^3.3.0",
-    "parcel": "^2.7.0",
-    "prettier": "^2.7.1",
-    "process": "^0.11.10",
-    "querystring-es3": "^0.2.1",
-    "stream-browserify": "^3.0.0",
-    "typescript": "^4.7.4"
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "pixi.js": "^6.5.1",
+    "pixi.js": "^7.0.5",
     "random-js": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18.11.17",
+    "buffer": "^5.5.0",
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.1.0",
+    "parcel": "^2.8.2",
+    "prettier": "^2.8.1",
+    "process": "^0.11.10",
+    "punycode": "^1.4.1",
+    "querystring-es3": "^0.2.1",
+    "stream-browserify": "^3.0.0",
+    "typescript": "^4.9.4"
   }
 }

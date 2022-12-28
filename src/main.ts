@@ -1,279 +1,118 @@
-import * as pixi from 'pixi.js'
-import { MersenneTwister19937 } from 'random-js'
 import { default as packageJson } from '../package.json'
-import { clickSound } from './audio/sound'
 import {
-  BACKGROUND_COLOR,
-  SQUARE_WIDTH,
-  STATION_MARGIN,
-  SWITCH_COLOR,
-  SWITCH_HOVER_COLOR,
-  SWITCH_WITH_TRAIN_COLOR,
-} from './constants'
-import { Game } from './game'
-import { generate } from './generator/adapter'
-import { directionToDelta } from './generator/util/direction'
-import * as graphics from './graphics'
-import { createGrid } from './grid'
-import { importerObject } from './level/importerObject'
+  defaultColorList,
+  defaultTheme,
+  parseThemeObject,
+  stringifyColorList,
+  stringifyThemeObject,
+  toHtmlColor,
+} from './color'
+import { setupGame } from './game'
+import { defaultLayout, phoneDefaultLayout, stringifyLayout } from './layout'
 import { create } from './lib/create'
 import { githubCornerHTML } from './lib/githubCorner'
-import { Direction, Grid, LevelObject } from './type'
-import { addPosition, colorNameToNumber, isStraight, randomPick } from './util'
+import { resolveSearch } from './lib/urlParameter'
 
-let levelPicker = (prop: { initGame: (a: Promise<LevelObject>) => void }) => {
-  let { initGame } = prop
-  let search = new URLSearchParams(location.search)
-  let level = (search.get('level') ?? '').split('-')[0]
-  if (search.has('level') && !isNaN(+level)) {
-    initGame(loadLevel())
-    return
-  }
-
-  let levelSelectionDiv = create('div', { className: 'levelSelectionDiv' }, [
-    create('h1', { textContent: 'Select a level' }),
-  ])
-  document.body.appendChild(levelSelectionDiv)
-
-  Object.keys(importerObject).forEach((levelNumber) => {
-    levelSelectionDiv.appendChild(
-      create('button', {
-        textContent: levelNumber,
-        className: 'levelSelectionButton',
-        onclick: () => {
-          let levelPromise = loadLevel(levelNumber)
-
-          levelSelectionDiv.style.opacity = '0%'
-          levelSelectionDiv.addEventListener('transitionend', () => {
-            document.body.removeChild(levelSelectionDiv)
-            search.set('level', levelNumber)
-            history.pushState({}, '', '?' + search)
-            initGame(levelPromise)
-          })
-        },
-      }),
-    )
-  })
+export interface TrackOfThoughtConfig {
+  colorList: string
+  departureClearance: number
+  duration: number
+  generateRetryCount: number
+  gridHeight: number
+  gridWidth: number
+  layout: string
+  level: number
+  phone: boolean
+  seed: number
+  stationCount: number
+  theme: string
+  trainCount: number
 }
 
-let importLevel = (prop: { levelNumber?: string; alternativeNumber?: string } = {}) => {
-  if (!prop.levelNumber) {
-    prop.levelNumber = randomPick(Object.keys(importerObject))
-  }
-  let alternativeImporterObject = importerObject[prop.levelNumber]
-  if (!prop.alternativeNumber) {
-    prop.alternativeNumber = randomPick(Object.keys(alternativeImporterObject))
-  }
-  console.log('level', prop.levelNumber, prop.alternativeNumber)
-  return alternativeImporterObject[prop.alternativeNumber]()
+function randomSeed() {
+  return Math.floor(Math.random() * 2 ** 32)
 }
 
-let loadLevel = async (levelNumber?: string) => {
-  let param = new URLSearchParams(location.search)
-  let alternativeNumber: string | undefined = undefined
-  if (param.has('level')) {
-    ;[levelNumber, alternativeNumber] = param.get('level')!.split('-')
-  }
-  let levelContent
-  console.log('param', param)
-  levelContent = generate({
-    // gridSize: { height: 9, width: 14 },
-    gridSize: { height: 5, width: 7 + Math.max(0, Math.floor((+(levelNumber ?? 0) - 9) / 2)) },
-    randomEngine: MersenneTwister19937.seed(2 ** 32 * Math.random()),
-    retryCount: 100_000,
-    sortStationArray: false,
-    stationCount: +levelNumber!,
-    trainCount: 14 + 3 * +levelNumber!,
-  })
-
-  console.log('levelContent', levelContent)
-  return levelContent
-}
-
-let initGame = async (levelPromise: Promise<LevelObject>) => {
-  let type = 'WebGL'
-  if (!pixi.utils.isWebGLSupported()) {
-    type = 'canvas'
-  }
-
-  pixi.utils.sayHello(type)
-
-  let app = new pixi.Application({})
-  let speedFactor = 1
-
-  // size
-  let resize = () => {
-    app.renderer.resize(window.innerWidth - 3, window.innerHeight - 4)
-  }
-  resize()
-  window.addEventListener('resize', resize)
-
-  app.renderer.backgroundColor = BACKGROUND_COLOR
-
-  document.body.appendChild(app.view)
-  let levelContent = await levelPromise
-  window.getComputedStyle(app.view).opacity
-  app.view.className = 'visible'
-
-  let grid = createGrid(levelContent)
-
-  // speedFactor hooks
-  window.addEventListener('keydown', (event) => {
-    if (event.key === ' ') {
-      speedFactor = 3
+function levelInfo(level: number, phoneMode = false) {
+  level = Math.max(level, 3)
+  let trainCount = 14 + 3 * level
+  let stationCount = level
+  let big = 7 + Math.max(0, Math.floor(+(level - 8) / 2))
+  let small = 5 + Math.max(0, Math.floor(+(level - 7) / 4))
+  if (phoneMode) {
+    return {
+      gridHeight: big,
+      gridWidth: small,
+      trainCount,
+      stationCount,
     }
-  })
-  window.addEventListener('keyup', (event) => {
-    if (event.key === ' ') {
-      speedFactor = 1
-    }
-  })
-
-  let search = new URLSearchParams(location.search)
-  let enablePattern = search.has('pattern')
-  let errorSound = search.has('errorSound')
-
-  let stage = new pixi.Container()
-  stage.y = SQUARE_WIDTH
-  app.stage.addChild(stage)
-  addTracks(grid, app.view, stage)
-  addStations(grid, stage, enablePattern)
-  let game = new Game(stage, grid, app.view, { errorSound, enablePattern })
-  pixi.Ticker.shared.add(() => {
-    game.update(pixi.Ticker.shared.elapsedMS * speedFactor)
-  })
-}
-
-let simpleTrack = (start: Direction, end: Direction) => {
-  if (start === end) {
-    throw new Error(`encountered equal start and end (${start}) in some level file`)
   }
-  if (isStraight(start, end)) {
-    let result = graphics.road()
-    if ([start, end].includes('top')) {
-      result.rotation = Math.PI / 2
-      result.x += SQUARE_WIDTH
-    }
-    return result
-  } else {
-    let turn = graphics.roadTurn()
-    let [c, d] = [start, end].sort()
-    if (c + d === 'righttop') {
-      turn.rotation = Math.PI / 2
-      turn.x += SQUARE_WIDTH
-    } else if (c + d === 'bottomright') {
-      turn.rotation = Math.PI
-      turn.x += SQUARE_WIDTH
-      turn.y += SQUARE_WIDTH
-    } else if (c + d === 'bottomleft') {
-      turn.rotation = -Math.PI / 2
-      turn.y += SQUARE_WIDTH
-    }
-    return turn
+  return {
+    gridHeight: small,
+    gridWidth: big,
+    trainCount,
+    stationCount,
   }
 }
 
-let addTracks = (grid: Grid, canvas: HTMLCanvasElement, stage: pixi.Container) => {
-  // draw tracks and fill the switchArray
-  grid.tracks.forEach((track) => {
-    let result = new pixi.Container()
-
-    let g: pixi.Graphics
-    if (track.switch === 'true') {
-      g = simpleTrack(track.start, track.end2)
-      addPosition(g, track)
-      result.addChild(g)
-
-      g = graphics.switchCircle(SWITCH_COLOR)
-      addPosition(g, track)
-      result.addChild(g)
-      g.interactive = true
-
-      let param = new URLSearchParams(location.search)
-      g.hitArea = new pixi.Circle(SQUARE_WIDTH / 2, SQUARE_WIDTH / 2, SQUARE_WIDTH / 2)
-
-      let drawSwitch = (circleColor: number) => {
-        let g = simpleTrack(track.start, track.end2)
-        addPosition(g, track)
-        result.addChild(g)
-        g = graphics.switchCircle(circleColor)
-        addPosition(g, track)
-        result.addChild(g)
-        g = simpleTrack(track.start, track.end1)
-        addPosition(g, track)
-        result.addChild(g)
-      }
-
-      let switchTrack = () => {
-        ;[track.end1, track.end2] = [track.end2, track.end1]
-        clickSound.play()
-        if (track.trainCount > 0) {
-          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
-        } else {
-          drawSwitch(SWITCH_HOVER_COLOR)
-        }
-      }
-
-      track.redraw = () => {
-        if (track.trainCount > 0) {
-          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
-        } else {
-          drawSwitch(SWITCH_COLOR)
-        }
-      }
-      ;(g as any).on('mousedown', switchTrack)
-      ;(g as any).on('tap', switchTrack)
-      ;(g as any).on('mouseover', () => {
-        canvas.style.cursor = 'pointer'
-        if (track.trainCount > 0) {
-          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
-        } else {
-          drawSwitch(SWITCH_HOVER_COLOR)
-        }
-      })
-      ;(g as any).on('mouseout', () => {
-        canvas.style.cursor = 'inherit'
-        if (track.trainCount > 0) {
-          drawSwitch(SWITCH_WITH_TRAIN_COLOR)
-        } else {
-          drawSwitch(SWITCH_COLOR)
-        }
-      })
-    }
-    g = simpleTrack(track.start, track.end1)
-    addPosition(g, track)
-    result.addChild(g)
-    stage.addChild(result)
+function getConfig(location: Location) {
+  return resolveSearch<TrackOfThoughtConfig>(location, {
+    colorList: () => stringifyColorList(defaultColorList),
+    departureClearance: () => 3,
+    duration: () => 100,
+    generateRetryCount: () => (process.env.NODE_ENV === 'production' ? 200_000 : 200),
+    gridHeight: ({ level, phone }) => levelInfo(level(), phone()).gridHeight,
+    gridWidth: ({ level, phone }) => levelInfo(level(), phone()).gridWidth,
+    layout: ({ phone }) => stringifyLayout(phone() ? phoneDefaultLayout : defaultLayout),
+    level: () => 0,
+    phone: () => false,
+    seed: () => randomSeed(),
+    stationCount: ({ level }) => levelInfo(level()).stationCount,
+    theme: () => stringifyThemeObject(defaultTheme),
+    trainCount: ({ level }) => levelInfo(level()).trainCount,
   })
 }
 
-let addStations = (grid: Grid, stage: pixi.Container, enablePattern: boolean) => {
-  // draw stations
-  grid.stations.forEach((entry) => {
-    let hasPattern = enablePattern && entry.color.endsWith(' + o')
-    let g = graphics.station(colorNameToNumber(entry.color) ?? 0x222222, hasPattern)
-    addPosition(g, entry)
-    stage.addChild(g)
-    let { dx, dy } = directionToDelta((entry as any).start)
-    g.x += STATION_MARGIN * dx
-    g.y += STATION_MARGIN * dy
-  })
-  let g = graphics.station(colorNameToNumber(grid.start.color) ?? 0x222222, false)
-  addPosition(g, grid.start)
-  let { dx, dy } = directionToDelta(grid.start.exit)
-  g.x += STATION_MARGIN * dx
-  g.y += STATION_MARGIN * dy
-  stage.addChild(g)
-}
+function main() {
+  const config = getConfig(location)
+  console.info(`&seed=${config.seed}`)
+  console.info('config', config)
 
-let main = () => {
-  document.documentElement.style.backgroundColor = '#' + BACKGROUND_COLOR.toString(16)
+  const theme = parseThemeObject(config.theme)
+  console.info('theme', theme)
+
+  document.documentElement.style.backgroundColor = toHtmlColor(theme.background)
 
   document.body.innerHTML += githubCornerHTML(packageJson.repository, packageJson.version)
-  window.addEventListener('popstate', (event) => {
-    location.reload()
-  })
-  levelPicker({ initGame })
+
+  if (config.level > 0) {
+    setupGame(config, theme)
+  } else {
+    let levelSelectionDiv = create('div', { className: 'levelSelectionDiv' }, [
+      create('h1', { textContent: 'Select a level' }),
+    ])
+    document.body.appendChild(levelSelectionDiv)
+
+    Array.from({ length: 14 - 3 + 1 }, (_, k) => {
+      let levelNumber = `${k + 3}`
+      levelSelectionDiv.appendChild(
+        create('button', {
+          textContent: levelNumber,
+          className: 'levelSelectionButton',
+          onclick: () => {
+            levelSelectionDiv.style.opacity = '0%'
+            levelSelectionDiv.addEventListener('transitionend', () => {
+              document.body.removeChild(levelSelectionDiv)
+              let search = new URLSearchParams(location.search)
+              search.set('level', levelNumber)
+              history.pushState({}, '', '?' + search)
+              setupGame(getConfig(location), theme)
+            })
+          },
+        }),
+      )
+    })
+  }
 }
 
 main()

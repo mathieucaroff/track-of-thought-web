@@ -1,162 +1,246 @@
-import * as pixi from 'pixi.js'
-import { Train } from './train'
-import { colorNameToNumber, randomPick } from './util'
-import { Grid } from './type'
-import { errorSound } from './audio/sound'
-import { SCORE_BACKGROUND_COLOR, SQUARE_WIDTH, SW } from './constants'
+import { pixi, random } from './alias'
 
-export interface GameOption {
-  errorSound: boolean
-  enablePattern: boolean
-}
+import { clickSound } from './audio/sound'
+import { defaultColorList, parseColorList, Theme } from './color'
+import { generate } from './generator/generator'
+import { createEmptyGrid, getGrid } from './grid'
+import { parseLayout } from './layout'
+import { TrackOfThoughtConfig } from './main'
+import { createScore } from './score'
+import { createSketcher } from './sketch'
+import { createTrainManager } from './train'
+import { Direction, Position } from './type'
+import { Switch } from './type/tileType'
+import { isStraight } from './util/direction'
 
-export class Game {
-  trainArray: Train[] = []
-  startTimeArray: number[]
-  elapsedTimeMs: number
-  totalTrainCount = 0
-  goodTrainCount = 0
-  score: pixi.Text
-  finalText: pixi.Text
-  finalBackground: pixi.Graphics
-  constructor(
-    public stage: pixi.Container,
-    public grid: Grid,
-    public canvas: HTMLCanvasElement,
-    public option: GameOption,
-  ) {
-    let length = grid.balls.amount
-    this.startTimeArray = Array.from({ length }, (_, k) => {
-      return (k / length) * 100 * 1000 // spread the train's start time over the course of 100 seconds
+export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
+  const layout = parseLayout(config.layout)
+  console.info('layout', layout)
+
+  document.body.classList.add('gamemode')
+
+  const sketch = createSketcher(layout, theme)
+
+  const colorList = parseColorList(config.colorList).concat(defaultColorList)
+  const colorSet = new Set(colorList)
+  if (colorList.length < config.stationCount) {
+    defaultColorList.forEach((color) => {
+      if (!colorSet.has(color)) {
+        colorList.push(color)
+      }
     })
-    this.elapsedTimeMs = 0
-
-    // Score and score background
-    this.score = new pixi.Text(
-      `0 / 0 (-0)`,
-      new pixi.TextStyle({
-        fill: '#c7b59d',
-        fontFamily: 'Arial',
-        fontSize: 35 * SW,
-      }),
-    )
-    this.score.anchor.set(0.5)
-
-    let scoreBackground = new pixi.Graphics()
-    scoreBackground.beginFill(SCORE_BACKGROUND_COLOR)
-    scoreBackground.drawRect(-30 * SW, -20 * SW, 225 * SW, 60 * SW)
-
-    scoreBackground.x = 30 * SW
-    scoreBackground.y = -SQUARE_WIDTH + 10 * SW
-    this.score.x = 110 * SW
-    this.score.y = -SQUARE_WIDTH + 24 * SW
-
-    stage.addChild(scoreBackground)
-    stage.addChild(this.score)
-
-    // Button back
-    let buttonBack = new pixi.Text('⮌', {
-      fill: '#c7b59d',
-      fontSize: 35 * SW,
-    })
-    buttonBack.x = 235 * SW
-    buttonBack.y = -122 * SW
-    let buttonBackBackground = new pixi.Graphics()
-    scoreBackground.beginFill(0x4b494a)
-    scoreBackground.drawRect(190 * SW, -20 * SW, 60 * SW, 60 * SW)
-    buttonBackBackground.interactive = true
-    buttonBackBackground.hitArea = new pixi.Rectangle(215 * SW, -140 * SW, 70 * SW, 60 * SW)
-    let goBack = () => {
-      location.search = ''
-    }
-    buttonBackBackground.on('mousedown', goBack)
-    buttonBackBackground.on('tap', goBack)
-    buttonBackBackground.on('mouseover', () => {
-      this.canvas.style.cursor = 'pointer'
-    })
-    buttonBackBackground.on('mouseout', () => {
-      this.canvas.style.cursor = 'inherit'
-    })
-    stage.addChild(buttonBack)
-    stage.addChild(buttonBackBackground)
-
-    // Final text
-    this.finalText = new pixi.Text(
-      '',
-      new pixi.TextStyle({
-        fill: '#c7b59d',
-        fontFamily: 'Arial',
-        fontSize: 60 * SW,
-        strokeThickness: 5 * SW,
-        align: 'center',
-      }),
-    )
-    this.finalText.anchor.set(0.5)
-    this.finalText.x = 480 * SW
-    this.finalText.y = 300 * SW
-    this.finalBackground = new pixi.Graphics()
-    stage.addChild(this.finalBackground)
-    stage.addChild(this.finalText)
-  }
-  update(elapsedMS: number) {
-    this.elapsedTimeMs += elapsedMS
-    while (this.startTimeArray.length > 0 && this.startTimeArray[0] < this.elapsedTimeMs) {
-      this.startTimeArray.shift()
-      let colorName = randomPick(this.grid.stations).color
-      let train = new Train(
-        this.grid,
-        { ...this.grid.start },
-        0.5,
-        colorNameToNumber(colorName) || 0,
-        this.option.enablePattern && colorName.endsWith(' + o'),
-        true,
+    if (colorList.length < config.stationCount) {
+      throw new Error(
+        `too few colors (${colorSet.size} colors for ${config.stationCount} stations)`,
       )
-      this.trainArray.push(train)
-      this.stage.addChild(train.g)
-    }
-
-    // remove the trains which have reached a station
-    this.trainArray = this.trainArray.filter((train) => {
-      if (!train.running) {
-        this.removeTrain(train)
-        return false
-      }
-      return true
-    })
-
-    // update the trains
-    this.trainArray.forEach((train) => {
-      train.update(elapsedMS)
-    })
-  }
-
-  removeTrain(train: Train) {
-    this.stage.removeChild(train.g)
-    this.totalTrainCount += 1
-    if (train.colorMatchesStation()) {
-      this.goodTrainCount += 1
     } else {
-      if (this.option.errorSound) {
-        errorSound.play()
-      }
-    }
-    this.score.text = `${this.goodTrainCount} / ${this.totalTrainCount} (-${
-      this.totalTrainCount - this.goodTrainCount
-    })`
-    if (this.totalTrainCount === this.grid.balls.amount) {
-      this.reportUserResult()
+      console.log(
+        "warning: there's not enough colors in the list for the number of stations. Colors from the default set have been added.",
+      )
     }
   }
 
-  reportUserResult() {
-    let diff = this.goodTrainCount - this.totalTrainCount
-    this.finalBackground.beginFill(SCORE_BACKGROUND_COLOR)
-    this.finalBackground.drawRect(250 * SW, 210 * SW, 460 * SW, 180 * SW)
-    this.finalText.text = this.score.text
-    if (diff === 0) {
-      this.finalText.text += '\nPerfect score!'
-    } else if (diff >= -2) {
-      this.finalText.text += '\nLevel complete!'
+  const randomEngine = random.MersenneTwister19937.seed(config.seed)
+
+  const level = generate({
+    gridSize: { height: config.gridHeight, width: config.gridWidth },
+    randomEngine,
+    stationCount: config.stationCount,
+    retryCount: config.generateRetryCount,
+    departureClearance: config.departureClearance,
+  })
+
+  console.info('level', level)
+
+  const grid = getGrid(level, {
+    width: config.gridWidth,
+    height: config.gridHeight,
+  })
+
+  const score = createScore(config.trainCount, document.body, layout, theme)
+
+  const graphicalGrid = createEmptyGrid<pixi.Container | null>({
+    width: config.gridWidth,
+    height: config.gridHeight,
+  })
+
+  let app = new pixi.Application({
+    antialias: true,
+    resizeTo: window,
+    background: theme.background,
+  })
+  let canvas = app.view as HTMLCanvasElement
+  setTimeout(() => {
+    canvas.classList.add('visible')
+  })
+  document.body.appendChild(canvas)
+
+  let gameContainer = new pixi.Container()
+  let railContainer = new pixi.Container()
+  let trainContainer = new pixi.Container()
+  let stationContainer = new pixi.Container()
+
+  gameContainer.y += layout.scoreHeight + 6
+
+  const addPosition = (g: pixi.Container, position: Position) => {
+    g.x += layout.squareWidth * position.x
+    g.y += layout.squareWidth * position.y
+    return g
+  }
+
+  // Draw Start
+  let g = sketch.station(level.departure, theme.departure)
+  addPosition(g, level.departure)
+  stationContainer.addChild(g)
+
+  graphicalGrid[level.departure.y][level.departure.x] = g
+
+  // Draw destination stations
+  level.destinationArray.map((station, k) => {
+    let g = sketch.station(station, colorList[k])
+    addPosition(g, station)
+    graphicalGrid[station.y][station.x] = g
+    stationContainer.addChild(g)
+  })
+
+  // Make switches interactive and draw tracks
+
+  const drawTrack = (start: Direction, end: Direction) => {
+    if (start === end) {
+      throw new Error(`encountered equal start and end (${start})`)
+    }
+    if (isStraight(start, end)) {
+      let result = sketch.road()
+      if ([start, end].includes('top')) {
+        result.rotation = Math.PI / 2
+        result.x += layout.squareWidth
+      }
+      return result
+    } else {
+      let turn = sketch.roadTurn()
+      let [c, d] = [start, end].sort()
+      if (c + d === 'righttop') {
+        turn.rotation = Math.PI / 2
+        turn.x += layout.squareWidth
+      } else if (c + d === 'bottomright') {
+        turn.rotation = Math.PI
+        turn.x += layout.squareWidth
+        turn.y += layout.squareWidth
+      } else if (c + d === 'bottomleft') {
+        turn.rotation = -Math.PI / 2
+        turn.y += layout.squareWidth
+      }
+      return turn
     }
   }
+
+  let drawSwitch = (track: Switch) => {
+    let result = new pixi.Container()
+    result.addChild(drawTrack(track.entrance, track.otherExit))
+    let g = new pixi.Graphics()
+    sketch.switchCircle(g, theme.switch)
+    result.addChild(g)
+    result.addChild(drawTrack(track.entrance, track.exit))
+    return result
+  }
+  const toggleSwitch = (g: pixi.Container, rail: Switch) => {
+    ;[rail.exit, rail.otherExit] = [rail.otherExit, rail.exit]
+    let h: any = g
+    ;[h.children[0], h.children[2]] = [h.children[2], h.children[0]]
+
+    clickSound.play()
+  }
+
+  const updateSwitchColor = (x: number, y: number) => {
+    let rail = grid[y][x]
+    if (rail?.type !== 'switch') {
+      throw new Error('never, switch')
+    }
+    let color = theme.switch
+    if (rail.mouseIsOver) {
+      if (rail.trainCount > 0) {
+        color = theme.switchHoverWithTrain
+      } else {
+        color = theme.switchHover
+      }
+    } else if (rail.trainCount > 0) {
+      color = theme.switchWithTrain
+    }
+    let g = graphicalGrid[y][x]
+    sketch.switchCircle(g?.children[1] as pixi.Graphics, color)
+  }
+
+  const makeSwitchInteractive = (g: pixi.Container, rail: Switch) => {
+    g.interactive = true
+    g.hitArea = new pixi.Circle(
+      layout.squareWidth / 2,
+      layout.squareWidth / 2,
+      layout.squareWidth / 2,
+    )
+    let toggle = () => toggleSwitch(g, rail)
+    g.on('mousedown', toggle)
+    g.on('tap', toggle)
+    g.on('mouseover', () => {
+      canvas.style.cursor = 'pointer'
+      rail.mouseIsOver = true
+      updateSwitchColor(rail.x, rail.y)
+    })
+    g.on('mouseout', () => {
+      canvas.style.cursor = 'inherit'
+      rail.mouseIsOver = false
+      updateSwitchColor(rail.x, rail.y)
+    })
+  }
+
+  level.railArray.map((track) => {
+    let g: pixi.Container
+    if (track.type === 'switch') {
+      g = drawSwitch(track)
+      makeSwitchInteractive(g, track)
+    } else {
+      g = drawTrack(track.entrance, track.exit!)
+    }
+    addPosition(g, track)
+
+    graphicalGrid[track.y][track.x] = g
+    railContainer.addChild(g)
+  })
+
+  // Manage the update speed
+  let speedFactor = 1
+  window.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+      speedFactor = 3
+    }
+  })
+  window.addEventListener('keyup', (event) => {
+    if (event.key === ' ') {
+      speedFactor = 1
+    }
+  })
+
+  app.stage.addChild(gameContainer)
+  gameContainer.addChild(railContainer)
+  gameContainer.addChild(trainContainer)
+  gameContainer.addChild(stationContainer)
+
+  let trainManager = createTrainManager({
+    colorList,
+    container: trainContainer,
+    grid,
+    randomEngine,
+    departure: level.departure,
+    destinationArray: level.destinationArray,
+    layout,
+    sketch,
+    config,
+    score,
+    updateSwitchColor,
+  })
+
+  const loop = () => {
+    trainManager.update(speedFactor)
+    requestAnimationFrame(loop)
+  }
+  loop()
 }

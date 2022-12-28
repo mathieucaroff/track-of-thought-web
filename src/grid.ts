@@ -1,34 +1,26 @@
-import { Grid, LevelObject, StationEntry } from './type'
+import { Level, Size } from './type'
+import { Destination, Rail, Tile } from './type/tileType'
 
-export let createGrid = (levelObject: LevelObject): Grid => {
-  let content: Grid['content'] = Array.from({ length: 9 }, () => Array.from({ length: 14 }))
-  levelObject.tracks.forEach((track) => {
-    track.trainCount = 0
-    content[track.row][track.column] = track
+export function createEmptyGrid<T>(size) {
+  return Array.from({ length: size.height }, () =>
+    Array.from({ length: size.width }, () => null),
+  ) as T[][]
+}
+
+export let getGrid = (level: Level, size: Size) => {
+  let { departure, railArray, destinationArray } = level
+
+  let grid = createEmptyGrid<Tile | null>(size)
+
+  grid[departure.y][departure.x] = departure
+
+  railArray.forEach((track) => {
+    grid[track.y][track.x] = track
   })
-  levelObject.stations.forEach((station) => {
-    station.trainCount = 0
-    content[station.row][station.column] = station
+
+  destinationArray.forEach((station) => {
+    grid[station.y][station.x] = station
   })
-  // get the startpoint
-  let start: StationEntry | undefined = undefined
-  let stations = levelObject.stations.filter((s) => {
-    if (s.type === 'start') {
-      if (start !== undefined) {
-        throw new Error(`the level contains more than one start point`)
-      }
-      start = s
-      return false
-    }
-    return true
-  })
-  if (start === undefined) {
-    throw new Error(`the level does not contain a start point`)
-  }
-  return {
-    ...levelObject,
-    stations,
-    content,
-    start,
-  }
+
+  return grid
 }

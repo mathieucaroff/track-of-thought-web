@@ -1,3 +1,7 @@
+export function toHtmlColor(color: number) {
+  return '#' + color.toString(16).padStart(6, '0')
+}
+
 export function stringifyThemeObject(colorObject: Record<string, number>) {
   return Object.entries(colorObject)
     .map(([key, value]) => `${key}:${value.toString(16).padStart(6, '0')}`)
@@ -5,9 +9,9 @@ export function stringifyThemeObject(colorObject: Record<string, number>) {
 }
 
 export function parseThemeObject(input: string) {
-  let result: Record<string, number> = {}
+  let result: Theme = { ...defaultTheme }
 
-  input.split(';').forEach((pair) => {
+  input.split(',').forEach((pair) => {
     let [name, value] = pair.split(':')
     result[name] = parseInt(value, 16)
   })
@@ -15,18 +19,20 @@ export function parseThemeObject(input: string) {
   return result
 }
 
-export const defaultThemeObject = {
+export const defaultTheme = {
   background: 0x2d2e37,
   pavement: 0xb0b0b0,
   asphalt: 0x37383f,
+  departure: 0x000000,
   switch: 0x4b494a,
   switchHover: 0x9b999a,
   switchOutline: 0xdddddd,
   scoreBackground: 0x4b494a,
   switchWithTrain: 0x000000,
+  switchHoverWithTrain: 0x303030,
 }
 
-export type Theme = typeof defaultThemeObject
+export type Theme = typeof defaultTheme
 
 export function stringifyColorList(colorList: number[]) {
   return colorList.map((c) => c.toString(16).padStart(6, '0')).join(',')
@@ -49,6 +55,7 @@ export const defaultColorList = [
   0x880000, // dark red
   0x008888, // dark cyan
   0x888800, // dark yellow
-  0x884400, // dark orange
+  0x666666, // grey
+  0xcccccc, // white-ish
   0x884444, // dark pink
 ]
