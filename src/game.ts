@@ -57,7 +57,13 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     height: config.gridHeight,
   })
 
-  const score = createScore(config.trainCount, document.body, layout, theme)
+  const onGameEnd = () => {
+    interativeGraphicalSwitchArray.forEach((g) => {
+      g.interactive = false
+    })
+  }
+
+  const score = createScore(config.trainCount, document.body, layout, theme, onGameEnd)
 
   const graphicalGrid = createEmptyGrid<pixi.Container | null>({
     width: config.gridWidth,
@@ -170,8 +176,10 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     sketch.switchCircle(g?.children[1] as pixi.Graphics, color)
   }
 
+  let interativeGraphicalSwitchArray: pixi.Container[] = []
   const makeSwitchInteractive = (g: pixi.Container, rail: Switch) => {
     g.interactive = true
+    interativeGraphicalSwitchArray.push(g)
     g.hitArea = new pixi.Circle(
       layout.squareWidth / 2,
       layout.squareWidth / 2,

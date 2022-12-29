@@ -37,8 +37,8 @@ function levelInfo(level: number, phoneMode = false) {
   level = Math.max(level, 3)
   let trainCount = 14 + 3 * level
   let stationCount = level
-  let big = 7 + Math.max(0, Math.floor(+(level - 8) / 2))
-  let small = 5 + Math.max(0, Math.floor(+(level - 7) / 4))
+  let big = 8 + Math.max(0, Math.floor(+(level - 11) / 2))
+  let small = 6
   if (phoneMode) {
     return {
       gridHeight: big,
@@ -60,7 +60,7 @@ function getConfig(location: Location) {
     colorList: () => stringifyColorList(defaultColorList),
     departureClearance: () => 3,
     duration: () => 100,
-    generateRetryCount: () => (process.env.NODE_ENV === 'production' ? 200_000 : 200),
+    generateRetryCount: () => (process.env.NODE_ENV === 'production' ? 200_000 : 2_000),
     gridHeight: ({ level, phone }) => levelInfo(level(), phone()).gridHeight,
     gridWidth: ({ level, phone }) => levelInfo(level(), phone()).gridWidth,
     layout: ({ phone }) => stringifyLayout(phone() ? phoneDefaultLayout : defaultLayout),

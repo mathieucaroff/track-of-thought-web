@@ -57,6 +57,17 @@ function coreGenerate(config: GeneratorConfig): Level {
   // Compute the base available options where we can place stations
   let optionCount = gridSize.width * gridSize.height
   let optionArray = Array.from({ length: optionCount }, (_, k) => k)
+  let betterOptionArray: number[] = []
+  // we make the borders more likely to be picked as station position
+  optionArray.forEach((positionNumber) => {
+    let x = positionNumber % gridSize.width
+    let y = Math.floor(positionNumber / gridSize.width)
+    if (x === 0 || x === gridSize.width - 1 || y === 0 || y === gridSize.height - 1) {
+      betterOptionArray.push(positionNumber)
+    }
+  })
+  optionArray.push(...betterOptionArray, ...betterOptionArray)
+  // we remove all the positions too close from the start
   let startSurrounding = surroundingSquare(config.departureClearance + 1, departure).filter(
     isInGridBound(config.gridSize),
   )
@@ -64,10 +75,10 @@ function coreGenerate(config: GeneratorConfig): Level {
 
   // Place `stationCount` stations, one after the other
   for (let k = 0; k < stationCount; k++) {
-    const stationNumber = random.picker(optionArray)(randomEngine)
-    lodash.pull(optionArray, stationNumber)
-    let x = stationNumber % gridSize.width
-    let y = Math.floor(stationNumber / gridSize.width)
+    const positionNumber = random.picker(optionArray)(randomEngine)
+    lodash.pull(optionArray, positionNumber)
+    let x = positionNumber % gridSize.width
+    let y = Math.floor(positionNumber / gridSize.width)
     let entrance = '<direction to be determined>' as Direction
     const destination: Destination = { type: 'destination', colorIndex: k, x, y, entrance }
 

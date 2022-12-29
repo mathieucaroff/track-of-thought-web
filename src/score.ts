@@ -7,6 +7,7 @@ export function createScore(
   container: HTMLElement,
   layout: Layout,
   theme: Theme,
+  onGameEnd: () => void,
 ) {
   let trainCount = 0
   let goodTrainCount = 0
@@ -55,6 +56,7 @@ export function createScore(
             textAlign: 'center',
             padding: '15px 75px',
             backgroundColor: toHtmlColor(theme.scoreBackground),
+            border: 'solid 10px #808080',
           },
         },
         [
@@ -75,6 +77,7 @@ export function createScore(
       scoreSpan.textContent = getScoreText()
       if (trainCount >= totalTrainCount) {
         showScore()
+        onGameEnd()
       }
     },
   }
