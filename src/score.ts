@@ -35,6 +35,7 @@ export function createScore(
       height: `${layout.scoreHeight}}px`,
       backgroundColor: toHtmlColor(theme.scoreBackground),
       fontSize: `${layout.scoreHeight}px`,
+      userSelect: 'none',
     },
     textContent: getScoreText(),
   })
@@ -57,6 +58,7 @@ export function createScore(
             padding: '15px 75px',
             backgroundColor: toHtmlColor(theme.scoreBackground),
             border: 'solid 10px #808080',
+            userSelect: 'none',
           },
         },
         [

@@ -1,7 +1,7 @@
 import { Direction, Position } from '../type'
 import { difference } from './position'
 
-const DIRECTION_ARRAY: Direction[] = ['bottom', 'left', 'right', 'top']
+export const DIRECTION_ARRAY: Direction[] = ['bottom', 'left', 'right', 'top']
 
 export function oppositeOf(direction: Direction): Direction {
   return {

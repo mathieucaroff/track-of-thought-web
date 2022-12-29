@@ -9,9 +9,11 @@ This is a game to train divided attention. It is a ripoff from Lumosity's Train 
 ## Building
 
 - Install dependencies by running `yarn`
-- Run `node src/level/generate-level-importer.js`
-- Run `yarn parcel build src/index.html`
+- Run `yarn build`
 
-## Credit
+You can then open dist/index.html in your web browser of choice.
 
-- The levels in this game were taken from [macie-k's track-of-thought](https://github.com/macie-k/track-of-thought), themselves inspired from those of Lumosity.
+## Developing
+
+- Install dependencies by running `yarn`
+- Run `yarn serve`

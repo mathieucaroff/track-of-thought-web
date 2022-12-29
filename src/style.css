@@ -1,18 +1,50 @@
-* {
-  font-family: 'Segoe UI', Tahoma, sans-serif;
+html {
+  background-color: black;
+  color: #c7b59d;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-h1, h2, h3 {
-  font-weight: 300;
+body {
+  margin: 0;
+  padding: 0;
 }
 
-h4, h5, h6 {
-  font-weight: 400;
+body.gamemode {
+  overflow: hidden;
 }
 
-code {
-  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  background-color: rgba(160, 160, 160, 0.6);
-  padding: 1px 4px;
-  border-radius: 4px;
+canvas {
+  opacity: 0;
+}
+
+canvas.visible {
+  opacity: 1;
+  transition: opacity 0.7s;
+}
+
+.levelSelectionDiv {
+  max-width: 900px;
+  margin: auto;
+  opacity: 1;
+  transition: opacity 0.7s;
+}
+
+.levelSelectionButton {
+  display: inline-block;
+  text-align: center;
+  padding: 27px 0;
+  border: solid 4px #c7b59d;
+  margin: 10px;
+  width: 120px;
+  color: #c7b59d;
+  background-color: #282d33;
+  transition: 0.15s linear;
+  font-size: 300%;
+}
+
+.levelSelectionButton:hover {
+  color: #282d33;
+  background-color: #c7b59d;
 }

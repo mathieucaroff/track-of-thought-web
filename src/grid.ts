@@ -1,5 +1,5 @@
 import { Level, Size } from './type'
-import { Destination, Rail, Tile } from './type/tileType'
+import { Tile } from './type/tileType'
 
 export function createEmptyGrid<T>(size) {
   return Array.from({ length: size.height }, () =>

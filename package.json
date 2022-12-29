@@ -1,13 +1,13 @@
 {
-  "name": "track-of-thought-gen",
+  "name": "track-of-thought-web",
   "version": "2.0.0",
   "description": "A game to train diveded attention",
-  "repository": "https://github.com/mathieucaroff/track-of-thought-gen",
+  "repository": "https://github.com/mathieucaroff/track-of-thought-web",
   "author": "Mathieu CAROFF <mathieu.caroff@free.fr>",
   "license": "ISC",
   "scripts": {
     "build": "parcel build src/index.html",
-    "mcabuild": "parcel build src/index.html --public-url track-of-thought-gen.d",
+    "mcabuild": "parcel build src/index.html --public-url track-of-thought-web.d",
     "serve": "parcel src/index.html"
   },
   "dependencies": {

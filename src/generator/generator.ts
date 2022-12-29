@@ -2,9 +2,10 @@ import { lodash, random } from '../alias'
 import { GeneratorAbortionError } from '../error'
 import { createEmptyGrid } from '../grid'
 import { Direction, Has, Position, Size, Tile, Departure, Level } from '../type'
-import { Destination, Rail, Switch, Track } from '../type/tileType'
-import { moveDirectionArray, directionToDelta, oppositeOf } from '../util/direction'
-import { distance, distance2, positionEqual, surroundingSquare } from '../util/position'
+import { Destination, Rail, Switch } from '../type/tileType'
+import { directionToDelta } from '../util/direction'
+import { distance, distance2, surroundingSquare } from '../util/position'
+import { trackIsTooLinear } from './check'
 import { railwayConnection } from './connector'
 
 export interface GeneratorConfig {
@@ -128,6 +129,10 @@ function coreGenerate(config: GeneratorConfig): Level {
     junction.otherExit = exit
     junction.trainCount = 0
     junction.mouseIsOver = false
+  }
+
+  if (trackIsTooLinear(departure, grid, gridSize.width + gridSize.height - 3)) {
+    throw new GeneratorAbortionError('track is too linear')
   }
 
   return {

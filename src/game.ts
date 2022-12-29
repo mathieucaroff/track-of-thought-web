@@ -22,8 +22,8 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
   const sketch = createSketcher(layout, theme)
 
   const colorList = parseColorList(config.colorList).concat(defaultColorList)
-  const colorSet = new Set(colorList)
   if (colorList.length < config.stationCount) {
+    const colorSet = new Set(colorList)
     defaultColorList.forEach((color) => {
       if (!colorSet.has(color)) {
         colorList.push(color)
