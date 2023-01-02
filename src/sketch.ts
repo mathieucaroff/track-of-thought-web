@@ -103,7 +103,7 @@ export function createSketcher(layout: Layout, theme: Theme, showColorIndices: b
     h.addChild(g)
 
     if (showColorIndices) {
-      let textContent = `${colorIndex}`
+      let textContent = colorIndex.toString(16).toUpperCase()
       let j = text(textContent, squareWidth / 4)
       j.x += 0.52 * squareWidth - 0.08 * squareWidth * textContent.length
       j.y += 0.38 * squareWidth
@@ -125,7 +125,7 @@ export function createSketcher(layout: Layout, theme: Theme, showColorIndices: b
     h.addChild(g)
 
     if (showColorIndices) {
-      let textContent = `${colorIndex}`
+      let textContent = colorIndex.toString(16).toUpperCase()
       let j = text(textContent, squareWidth / 7)
       j.x += 0.53 * squareWidth - 0.06 * squareWidth * textContent.length
       j.y += 0.42 * squareWidth

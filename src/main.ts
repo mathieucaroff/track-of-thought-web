@@ -12,6 +12,9 @@ import { defaultLayout, phoneDefaultLayout, stringifyLayout } from './layout'
 import { create } from './lib/create'
 import { githubCornerHTML } from './lib/githubCorner'
 import { resolveSearch } from './lib/urlParameter'
+import { isMobile } from './util/isMobile'
+
+export type Device = 'detect' | 'phone' | 'desktop' | ''
 
 export interface TrackOfThoughtConfig {
   colorList: string
@@ -22,7 +25,7 @@ export interface TrackOfThoughtConfig {
   gridWidth: number
   layout: string
   level: number
-  phone: boolean
+  device: Device
   seed: number
   showColorIndices: boolean
   stationCount: number
@@ -34,14 +37,18 @@ function randomSeed() {
   return Math.floor(Math.random() * 2 ** 32)
 }
 
-function levelInfo(level: number, phoneMode = false) {
+function levelInfo(level: number, device: Device) {
   level = Math.max(level, 3)
   let trainCount = 14 + 3 * level
   let stationCount = level
   let big = 8 + Math.max(0, Math.floor(+(level - 11) / 2))
   let small = 6
-  if (phoneMode) {
+  if (device === 'detect') {
+    device = isMobile() ? 'phone' : 'desktop'
+  }
+  if (device === 'phone') {
     return {
+      device: 'phone',
       gridHeight: big,
       gridWidth: small,
       trainCount,
@@ -49,6 +56,7 @@ function levelInfo(level: number, phoneMode = false) {
     }
   }
   return {
+    device: 'desktop',
     gridHeight: small,
     gridWidth: big,
     trainCount,
@@ -62,16 +70,19 @@ function getConfig(location: Location) {
     departureClearance: () => 3,
     duration: () => 100,
     generateRetryCount: () => (process.env.NODE_ENV === 'production' ? 200_000 : 2_000),
-    gridHeight: ({ level, phone }) => levelInfo(level(), phone()).gridHeight,
-    gridWidth: ({ level, phone }) => levelInfo(level(), phone()).gridWidth,
-    layout: ({ phone }) => stringifyLayout(phone() ? phoneDefaultLayout : defaultLayout),
+    gridHeight: ({ level, device }) => levelInfo(level(), device()).gridHeight,
+    gridWidth: ({ level, device }) => levelInfo(level(), device()).gridWidth,
+    layout: ({ device }) =>
+      stringifyLayout(
+        levelInfo(-1, device()).device === 'phone' ? phoneDefaultLayout : defaultLayout,
+      ),
     level: () => 0,
-    phone: () => false,
+    device: () => 'detect',
     seed: () => randomSeed(),
     showColorIndices: () => false,
-    stationCount: ({ level }) => levelInfo(level()).stationCount,
+    stationCount: ({ level }) => levelInfo(level(), '').stationCount,
     theme: () => stringifyThemeObject(defaultTheme),
-    trainCount: ({ level }) => levelInfo(level()).trainCount,
+    trainCount: ({ level }) => levelInfo(level(), '').trainCount,
   })
 }
 

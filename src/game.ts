@@ -244,8 +244,15 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     updateSwitchColor,
   })
 
+  let lastPerformance = performance.now()
   const loop = () => {
-    trainManager.update(speedFactor)
+    let elapsedTime = performance.now() - lastPerformance
+    lastPerformance += elapsedTime
+    // We limit the time value to avoid issues where the tab is no longer
+    // visible and thus requestAnimationFrame stops firing, but performance.now()
+    // keeps increasing
+    let clampedTime = Math.min(1, elapsedTime / 20)
+    trainManager.update(speedFactor * clampedTime)
     requestAnimationFrame(loop)
   }
   loop()
