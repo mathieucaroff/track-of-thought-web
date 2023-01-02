@@ -106,7 +106,7 @@ export function createTrain(param: TrainParam) {
   let position = { ...param.position }
   let { grid, colorList, colorIndex, layout, sketch, updateSwitchColor } = param
 
-  let g = sketch.train(colorList[colorIndex])
+  let g = sketch.train(colorIndex, colorList)
 
   const next = () => {
     let { x, y } = position

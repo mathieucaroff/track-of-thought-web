@@ -19,24 +19,21 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
 
   document.body.classList.add('gamemode')
 
-  const sketch = createSketcher(layout, theme)
+  const sketch = createSketcher(layout, theme, config.showColorIndices)
 
-  const colorList = parseColorList(config.colorList).concat(defaultColorList)
+  const colorList = parseColorList(config.colorList)
+  const colorListBaseLength = colorList.length
   if (colorList.length < config.stationCount) {
     const colorSet = new Set(colorList)
     defaultColorList.forEach((color) => {
       if (!colorSet.has(color)) {
         colorList.push(color)
+        colorSet.add(color)
       }
     })
-    if (colorList.length < config.stationCount) {
-      throw new Error(
-        `too few colors (${colorSet.size} colors for ${config.stationCount} stations)`,
-      )
-    } else {
-      console.log(
-        "warning: there's not enough colors in the list for the number of stations. Colors from the default set have been added.",
-      )
+    console.warn("There's not enough colors in the list for the number of stations")
+    if (colorList.length > colorListBaseLength) {
+      console.warn('Colors from the default set have been added')
     }
   }
 
@@ -95,7 +92,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
   }
 
   // Draw Start
-  let g = sketch.station(level.departure, theme.departure)
+  let g = sketch.station(level.departure, 0, [theme.departure])
   addPosition(g, level.departure)
   stationContainer.addChild(g)
 
@@ -103,7 +100,8 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
 
   // Draw destination stations
   level.destinationArray.map((station, k) => {
-    let g = sketch.station(station, colorList[k])
+    let colorIndex = k
+    let g = sketch.station(station, colorIndex, colorList)
     addPosition(g, station)
     graphicalGrid[station.y][station.x] = g
     stationContainer.addChild(g)

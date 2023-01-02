@@ -29,7 +29,7 @@ export const defaultTheme = {
   switchOutline: 0xdddddd,
   scoreBackground: 0x4b494a,
   switchWithTrain: 0x000000,
-  switchHoverWithTrain: 0x303030,
+  switchHoverWithTrain: 0xffffff,
 }
 
 export type Theme = typeof defaultTheme
@@ -59,3 +59,7 @@ export const defaultColorList = [
   0xcccccc, // white-ish
   0x884444, // dark pink
 ]
+
+export function getColorFromList(colorIndex: number, colorList: number[]) {
+  return colorList[colorIndex % colorList.length]
+}

@@ -24,6 +24,7 @@ export interface TrackOfThoughtConfig {
   level: number
   phone: boolean
   seed: number
+  showColorIndices: boolean
   stationCount: number
   theme: string
   trainCount: number
@@ -67,6 +68,7 @@ function getConfig(location: Location) {
     level: () => 0,
     phone: () => false,
     seed: () => randomSeed(),
+    showColorIndices: () => false,
     stationCount: ({ level }) => levelInfo(level()).stationCount,
     theme: () => stringifyThemeObject(defaultTheme),
     trainCount: ({ level }) => levelInfo(level()).trainCount,
