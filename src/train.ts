@@ -3,8 +3,9 @@ import { Layout } from './layout'
 import { TrackOfThoughtConfig } from './main'
 import { Score } from './score'
 import { Sketcher } from './sketch'
+import { SmartSwitch } from './tools/smartSwitchGrid'
 import { Direction, Position, Tile } from './type'
-import { Departure, Destination } from './type/tileType'
+import { Departure, Destination, Rail, Switch } from './type/tileType'
 import { directionToDelta, isStraight, oppositeOf } from './util/direction'
 import { isRail, isStation } from './util/tile'
 
@@ -20,6 +21,9 @@ export interface TrainManagerParam {
   score: Score
   sketch: Sketcher
   updateSwitchColor: (x: number, y: number) => void
+  smartSwitchGrid: (SmartSwitch | null)[][]
+  graphicalGrid: (pixi.Container | null)[][]
+  toggleSwitch: (g: pixi.Container, rail: Switch) => void
 }
 
 export function createTrainManager(param: TrainManagerParam) {
@@ -35,6 +39,9 @@ export function createTrainManager(param: TrainManagerParam) {
     score,
     sketch,
     updateSwitchColor,
+    smartSwitchGrid,
+    graphicalGrid,
+    toggleSwitch,
   } = param
 
   const { duration, trainCount } = config
@@ -61,6 +68,10 @@ export function createTrainManager(param: TrainManagerParam) {
       layout,
       sketch,
       updateSwitchColor,
+      smartSwitchGrid,
+      graphicalGrid,
+      toggleSwitch,
+      autoPlay: config.autoPlay,
     })
     container.addChild(train.g)
     trainArray.push(train)
@@ -76,9 +87,10 @@ export function createTrainManager(param: TrainManagerParam) {
       // remove the trains which have reached a station
       trainArray = trainArray.filter((train) => {
         if (!train.running) {
-          container.removeChild(train.g)
-
           score.trainArrival(train.colorMatchesStation())
+
+          container.removeChild(train.g)
+          train.g.destroy()
           return false
         }
         return true
@@ -100,11 +112,26 @@ export interface TrainParam {
   layout: Layout
   sketch: Sketcher
   updateSwitchColor: (x: number, y: number) => void
+  smartSwitchGrid: (SmartSwitch | null)[][]
+  graphicalGrid: (pixi.Container | null)[][]
+  toggleSwitch: (g: pixi.Container, rail: Switch) => void
+  autoPlay: boolean
 }
 
 export function createTrain(param: TrainParam) {
   let position = { ...param.position }
-  let { grid, colorList, colorIndex, layout, sketch, updateSwitchColor } = param
+  let {
+    grid,
+    colorList,
+    colorIndex,
+    layout,
+    sketch,
+    updateSwitchColor,
+    smartSwitchGrid,
+    graphicalGrid,
+    toggleSwitch,
+    autoPlay,
+  } = param
 
   let g = sketch.train(colorIndex, colorList)
 
@@ -133,16 +160,44 @@ export function createTrain(param: TrainParam) {
   const update = (timeStep: number) => {
     me.progress += timeStep / 80
     if (me.progress > 1) {
+      if (autoPlay) {
+        setSwitch()
+      }
       bumpSwitchTrainCount(-1)
       while (me.progress > 1) {
         next()
         me.progress -= 1
       }
       bumpSwitchTrainCount(1)
+      if (autoPlay) {
+        // we've just arrived on the tile, so we aren't in a hurry to set it to
+        // the right direction, so use the weak mode so that if there is already
+        // a train on the switch, the switch won't be toggled.
+        let weak = true
+        setSwitch(weak)
+      }
     }
     updatePosition()
     if (grid[position.y][position.x]?.type === 'destination' && me.progress >= 0.5) {
       me.running = false
+    }
+  }
+  // in autoplay mode, toggle the switch if necessary for the train to reach its
+  // destination
+  const setSwitch = (weak = false) => {
+    let { x, y } = position
+    let tile = grid[y][x]
+    if (tile?.type === 'switch') {
+      if (weak && tile.trainCount > 1) {
+        return
+      }
+      let smartSwitch = smartSwitchGrid[y][x]!
+      let colorArray =
+        tile.state === 'initial' ? smartSwitch.colorIndexArray : smartSwitch.colorIndexOtherArray
+      if (colorArray.includes(me.colorIndex)) {
+        let g = graphicalGrid[y][x]!
+        toggleSwitch(g, tile)
+      }
     }
   }
 

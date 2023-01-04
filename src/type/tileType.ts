@@ -22,6 +22,7 @@ export interface Switch extends Position {
   entrance: Direction
   exit: Direction
   otherExit: Direction
+  state: 'initial' | 'swapped'
   trainCount: number
   mouseIsOver: boolean
 }

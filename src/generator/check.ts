@@ -1,5 +1,5 @@
-import { Departure, Direction, Tile } from '../type'
-import { directionToDelta } from '../util/direction'
+import { Departure, Tile } from '../type'
+import { nextTile } from '../util/nextTile'
 import { isRail } from '../util/tile'
 
 export function trackIsTooLinear(
@@ -12,15 +12,6 @@ export function trackIsTooLinear(
     throw new Error('never, not rail tile')
   }
   return longestTrack(tile, grid) > maximumTrackLength
-}
-
-function nextTile(tile: Tile, direction: Direction, grid: (Tile | null)[][]) {
-  let { dx, dy } = directionToDelta(direction)
-  let next = grid[tile.y + dy][tile.x + dx]
-  if (!next) {
-    throw new Error('never, null tile')
-  }
-  return next
 }
 
 function longestTrack(tile: Tile, grid: (Tile | null)[][]) {

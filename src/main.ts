@@ -17,6 +17,7 @@ import { isMobile } from './util/isMobile'
 export type Device = 'detect' | 'phone' | 'desktop' | ''
 
 export interface TrackOfThoughtConfig {
+  autoPlay: boolean
   colorList: string
   departureClearance: number
   duration: number
@@ -66,6 +67,7 @@ function levelInfo(level: number, device: Device) {
 
 function getConfig(location: Location) {
   return resolveSearch<TrackOfThoughtConfig>(location, {
+    autoPlay: () => false,
     colorList: () => stringifyColorList(defaultColorList),
     departureClearance: () => 3,
     duration: () => 100,

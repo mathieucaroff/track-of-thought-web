@@ -8,6 +8,7 @@ import { parseLayout } from './layout'
 import { TrackOfThoughtConfig } from './main'
 import { createScore } from './score'
 import { createSketcher } from './sketch'
+import { getSmartSwitchGrid } from './tools/smartSwitchGrid'
 import { createTrainManager } from './train'
 import { Direction, Position } from './type'
 import { Switch } from './type/tileType'
@@ -66,6 +67,8 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     width: config.gridWidth,
     height: config.gridHeight,
   })
+
+  const smartSwitchGrid = getSmartSwitchGrid(config, level, grid)
 
   let app = new pixi.Application({
     antialias: true,
@@ -148,6 +151,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     return result
   }
   const toggleSwitch = (g: pixi.Container, rail: Switch) => {
+    rail.state = rail.state === 'initial' ? 'swapped' : 'initial'
     ;[rail.exit, rail.otherExit] = [rail.otherExit, rail.exit]
     let h: any = g
     ;[h.children[0], h.children[2]] = [h.children[2], h.children[0]]
@@ -242,6 +246,9 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     config,
     score,
     updateSwitchColor,
+    smartSwitchGrid,
+    graphicalGrid,
+    toggleSwitch,
   })
 
   let lastPerformance = performance.now()
