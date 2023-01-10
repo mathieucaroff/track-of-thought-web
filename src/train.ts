@@ -54,29 +54,29 @@ export function createTrainManager(param: TrainManagerParam) {
   let sentTrainCount = 0
 
   const addTrain = () => {
-    if (sentTrainCount >= trainCount || trainTime < trainPeriod) {
-      return
+    while (sentTrainCount < trainCount && trainTime >= trainPeriod) {
+      trainTime -= trainPeriod
+
+      let train = createTrain({
+        colorIndex: random.pick(randomEngine, destinationArray).colorIndex,
+        colorList,
+        grid,
+        position: departure,
+        layout,
+        sketch,
+        updateSwitchColor,
+        smartSwitchGrid,
+        graphicalGrid,
+        toggleSwitch,
+        autoPlay: config.autoPlay,
+      })
+      container.addChild(train.g)
+      trainArray.push(train)
+
+      train.progress += trainTime
+
+      sentTrainCount += 1
     }
-
-    trainTime -= trainPeriod
-
-    let train = createTrain({
-      colorIndex: random.pick(randomEngine, destinationArray).colorIndex,
-      colorList,
-      grid,
-      position: departure,
-      layout,
-      sketch,
-      updateSwitchColor,
-      smartSwitchGrid,
-      graphicalGrid,
-      toggleSwitch,
-      autoPlay: config.autoPlay,
-    })
-    container.addChild(train.g)
-    trainArray.push(train)
-
-    sentTrainCount += 1
   }
 
   return {
@@ -145,7 +145,7 @@ export function createTrain(param: TrainParam) {
       throw new Error('never, destination')
     }
 
-    let { dx, dy } = directionToDelta(track.exit!)
+    let { dx, dy } = directionToDelta(track.exit)
     position.x += dx
     position.y += dy
   }
