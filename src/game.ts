@@ -102,7 +102,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
   graphicalGrid[level.departure.y][level.departure.x] = g
 
   // Draw destination stations
-  level.destinationArray.map((station, k) => {
+  level.destinationArray.forEach((station, k) => {
     let colorIndex = k
     let g = sketch.station(station, colorIndex, colorList)
     addPosition(g, station)
@@ -251,10 +251,10 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     toggleSwitch,
   })
 
-  let lastPerformance = performance.now()
+  let lastTime = Date.now()
   const loop = () => {
-    let elapsedTime = performance.now() - lastPerformance
-    lastPerformance += elapsedTime
+    let elapsedTime = Date.now() - lastTime
+    lastTime += elapsedTime
     // We limit the time value to avoid issues where the tab is no longer
     // visible and thus requestAnimationFrame stops firing, but performance.now()
     // keeps increasing
