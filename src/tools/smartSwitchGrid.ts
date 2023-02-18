@@ -43,7 +43,7 @@ export function getSmartSwitchGrid(
           console.error('mismatch between track entraces and switch exits')
         }
       }
-      if (k === 999) {
+      if (k > 999) {
         console.error('infite loop (>999) while trying to add smart switch color', dest)
         break
       }
