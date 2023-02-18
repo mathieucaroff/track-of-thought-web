@@ -20,14 +20,16 @@ export interface TrackOfThoughtConfig {
   autoPlay: boolean
   colorList: string
   departureClearance: number
+  device: Device
   duration: number
   generateRetryCount: number
   gridHeight: number
   gridWidth: number
   layout: string
   level: number
-  device: Device
   seed: number
+  stationSeed: number
+  trainSeed: number
   showColorIndices: boolean
   stationCount: number
   theme: string
@@ -70,6 +72,7 @@ function getConfig(location: Location) {
     autoPlay: () => false,
     colorList: () => stringifyColorList(defaultColorList),
     departureClearance: () => 3,
+    device: () => 'detect',
     duration: () => 100,
     generateRetryCount: () => (process.env.NODE_ENV === 'production' ? 200_000 : 2_000),
     gridHeight: ({ level, device }) => levelInfo(level(), device()).gridHeight,
@@ -79,8 +82,9 @@ function getConfig(location: Location) {
         levelInfo(-1, device()).device === 'phone' ? phoneDefaultLayout : defaultLayout,
       ),
     level: () => 0,
-    device: () => 'detect',
     seed: () => randomSeed(),
+    stationSeed: ({ seed }) => seed(),
+    trainSeed: ({ seed }) => seed(),
     showColorIndices: () => false,
     stationCount: ({ level }) => levelInfo(level(), '').stationCount,
     theme: () => stringifyThemeObject(defaultTheme),

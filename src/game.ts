@@ -38,11 +38,9 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     }
   }
 
-  const randomEngine = random.MersenneTwister19937.seed(config.seed)
-
   const level = generate({
     gridSize: { height: config.gridHeight, width: config.gridWidth },
-    randomEngine,
+    randomEngine: random.MersenneTwister19937.seed(config.stationSeed),
     stationCount: config.stationCount,
     retryCount: config.generateRetryCount,
     departureClearance: config.departureClearance,
@@ -238,7 +236,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     colorList,
     container: trainContainer,
     grid,
-    randomEngine,
+    randomEngine: random.MersenneTwister19937.seed(config.trainSeed),
     departure: level.departure,
     destinationArray: level.destinationArray,
     layout,
