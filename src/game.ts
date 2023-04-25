@@ -47,6 +47,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
   })
 
   console.info('level', level)
+  console.info(`&seed=${config.seed}`)
 
   const grid = getGrid(level, {
     width: config.gridWidth,
