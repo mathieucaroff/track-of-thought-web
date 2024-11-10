@@ -58,9 +58,10 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     interativeGraphicalSwitchArray.forEach((g) => {
       g.interactive = false
     })
+    score.showScore()
   }
 
-  const score = createScore(config.trainCount, document.body, layout, theme, onGameEnd)
+  const score = createScore(document.body, layout, theme)
 
   const graphicalGrid = createEmptyGrid<pixi.Container | null>({
     width: config.gridWidth,
@@ -235,19 +236,20 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
 
   let trainManager = createTrainManager({
     colorList,
+    config,
     container: trainContainer,
-    grid,
-    randomEngine: random.MersenneTwister19937.seed(config.trainSeed),
     departure: level.departure,
     destinationArray: level.destinationArray,
-    layout,
-    sketch,
-    config,
-    score,
-    updateSwitchColor,
-    smartSwitchGrid,
     graphicalGrid,
+    grid,
+    layout,
+    onGameEnd,
+    randomEngine: random.MersenneTwister19937.seed(config.trainSeed),
+    score,
+    sketch,
+    smartSwitchGrid,
     toggleSwitch,
+    updateSwitchColor,
   })
 
   let lastTime = Date.now()

@@ -16,12 +16,17 @@ import { isMobile } from './util/isMobile'
 
 export type Device = 'detect' | 'phone' | 'desktop' | ''
 
+export type GamePlay = 'station' | 'switch'
+
 export interface TrackOfThoughtConfig {
   autoPlay: boolean
+  autoPlayOnEntry: boolean
+  autoPlayOnExit: boolean
   colorList: string
   departureClearance: number
   device: Device
   duration: number
+  gamePlay: GamePlay
   generateRetryCount: number
   gridHeight: number
   gridWidth: number
@@ -70,10 +75,13 @@ function levelInfo(level: number, device: Device) {
 function getConfig(location: Location) {
   return resolveSearch<TrackOfThoughtConfig>(location, {
     autoPlay: () => false,
+    autoPlayOnEntry: ({ autoPlay }) => autoPlay(),
+    autoPlayOnExit: ({ autoPlay }) => autoPlay(),
     colorList: () => stringifyColorList(defaultColorList),
     departureClearance: () => 3,
     device: () => 'detect',
     duration: () => 100,
+    gamePlay: () => 'station',
     generateRetryCount: () => (process.env.NODE_ENV === 'production' ? 200_000 : 2_000),
     gridHeight: ({ level, device }) => levelInfo(level(), device()).gridHeight,
     gridWidth: ({ level, device }) => levelInfo(level(), device()).gridWidth,
