@@ -5,6 +5,7 @@ import {
   parseThemeObject,
   stringifyColorList,
   stringifyThemeObject,
+  Theme,
   toHtmlColor,
 } from './color'
 import { setupGame } from './game'
@@ -37,7 +38,7 @@ export interface TrackOfThoughtConfig {
   trainSeed: number
   showColorIndices: boolean
   stationCount: number
-  theme: string
+  theme: Theme
   trainCount: number
 }
 
@@ -74,29 +75,31 @@ function levelInfo(level: number, device: Device) {
 
 function getConfig(location: Location) {
   return resolveSearch<TrackOfThoughtConfig>(location, {
-    autoPlay: () => false,
-    autoPlayOnEntry: ({ autoPlay }) => autoPlay(),
-    autoPlayOnExit: ({ autoPlay }) => autoPlay(),
-    colorList: () => stringifyColorList(defaultColorList),
-    departureClearance: () => 3,
-    device: () => 'detect',
-    duration: () => 100,
-    gamePlay: () => 'station',
-    generateRetryCount: () => (process.env.NODE_ENV === 'production' ? 200_000 : 2_000),
-    gridHeight: ({ level, device }) => levelInfo(level(), device()).gridHeight,
-    gridWidth: ({ level, device }) => levelInfo(level(), device()).gridWidth,
-    layout: ({ device }) =>
-      stringifyLayout(
-        levelInfo(-1, device()).device === 'phone' ? phoneDefaultLayout : defaultLayout,
-      ),
-    level: () => 0,
-    seed: () => randomSeed(),
-    stationSeed: ({ seed }) => seed(),
-    trainSeed: ({ seed }) => seed(),
-    showColorIndices: () => false,
-    stationCount: ({ level }) => levelInfo(level(), '').stationCount,
-    theme: () => stringifyThemeObject(defaultTheme),
-    trainCount: ({ level }) => levelInfo(level(), '').trainCount,
+    autoPlay: [() => false],
+    autoPlayOnEntry: [({ autoPlay }) => autoPlay()],
+    autoPlayOnExit: [({ autoPlay }) => autoPlay()],
+    colorList: [() => stringifyColorList(defaultColorList)],
+    departureClearance: [() => 3],
+    device: [() => 'detect'],
+    duration: [() => 100],
+    gamePlay: [() => 'switch'],
+    generateRetryCount: [() => (process.env.NODE_ENV === 'production' ? 200_000 : 2_000)],
+    gridHeight: [({ level, device }) => levelInfo(level(), device()).gridHeight],
+    gridWidth: [({ level, device }) => levelInfo(level(), device()).gridWidth],
+    layout: [
+      ({ device }) =>
+        stringifyLayout(
+          levelInfo(-1, device()).device === 'phone' ? phoneDefaultLayout : defaultLayout,
+        ),
+    ],
+    level: [() => 0],
+    seed: [() => randomSeed()],
+    stationSeed: [({ seed }) => seed()],
+    trainSeed: [({ seed }) => seed()],
+    showColorIndices: [() => false],
+    stationCount: [({ level }) => levelInfo(level(), '').stationCount],
+    theme: [() => stringifyThemeObject(defaultTheme), parseThemeObject],
+    trainCount: [({ level }) => levelInfo(level(), '').trainCount],
   })
 }
 
@@ -105,15 +108,14 @@ function main() {
   console.info(`&seed=${config.seed}`)
   console.info('config', config)
 
-  const theme = parseThemeObject(config.theme)
-  console.info('theme', theme)
+  console.info('theme', config.theme)
 
-  document.documentElement.style.backgroundColor = toHtmlColor(theme.background)
+  document.documentElement.style.backgroundColor = toHtmlColor(config.theme.background)
 
   document.body.innerHTML += githubCornerHTML(packageJson.repository, packageJson.version)
 
   if (config.level > 0) {
-    setupGame(config, theme)
+    setupGame(config)
   } else {
     let levelSelectionDiv = create('div', { className: 'levelSelectionDiv' }, [
       create('h1', { textContent: 'Select a level' }),
@@ -133,7 +135,7 @@ function main() {
               let search = new URLSearchParams(location.search)
               search.set('level', levelNumber)
               history.pushState({}, '', '?' + search)
-              setupGame(getConfig(location), theme)
+              setupGame(getConfig(location))
             })
           },
         }),

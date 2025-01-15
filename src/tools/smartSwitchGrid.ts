@@ -1,7 +1,7 @@
 import { createEmptyGrid } from '../grid'
 import { TrackOfThoughtConfig } from '../main'
 import { Level } from '../type'
-import { Destination, Rail, Switch, Tile } from '../type/tileType'
+import { Destination, Switch, Tile } from '../type/tileType'
 import { oppositeOf } from '../util/direction'
 import { nextTile } from '../util/nextTile'
 
