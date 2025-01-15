@@ -16,18 +16,18 @@ export interface Layout {
 }
 
 export const defaultLayoutInfoObject: InfoObject<Layout> = {
-  squareWidth: () => 128,
-  sw: ({ squareWidth }) => squareWidth(),
-  stationBorder: ({ sw }) => sw() / 24,
-  stationMargin: ({ sw }) => sw() / 6,
-  squareBorder: ({ sw }) => sw() / 16,
-  roadWidth: ({ sw }) => (sw() * 3) / 10,
-  interiorRoadWidth: ({ sw }) => (sw() * 2) / 10,
-  roadHole: ({ sw, roadWidth }) => (sw() - roadWidth()) / 2,
-  roadBorder: ({ roadWidth, interiorRoadWidth }) => (roadWidth() - interiorRoadWidth()) / 2,
-  scoreHeight: () => 50,
-  switchOutlineWidth: () => 2,
-  switchRadius: ({ sw }) => sw() / 3,
+  squareWidth: [() => 128],
+  sw: [({ squareWidth }) => squareWidth()],
+  stationBorder: [({ sw }) => sw() / 24],
+  stationMargin: [({ sw }) => sw() / 6],
+  squareBorder: [({ sw }) => sw() / 16],
+  roadWidth: [({ sw }) => (sw() * 3) / 10],
+  interiorRoadWidth: [({ sw }) => (sw() * 2) / 10],
+  roadHole: [({ sw, roadWidth }) => (sw() - roadWidth()) / 2],
+  roadBorder: [({ roadWidth, interiorRoadWidth }) => (roadWidth() - interiorRoadWidth()) / 2],
+  scoreHeight: [() => 50],
+  switchOutlineWidth: [() => 2],
+  switchRadius: [({ sw }) => sw() / 3],
 }
 
 export function stringifyLayout(layout: Layout) {
@@ -42,7 +42,7 @@ export function parseLayout(input: string): Layout {
   if (input) {
     input.split(',').forEach((pair) => {
       let [name, value] = pair.split(':')
-      infoObject[name] = () => +value
+      infoObject[name] = [() => +value]
     })
   }
 

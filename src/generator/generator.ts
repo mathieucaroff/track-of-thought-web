@@ -1,7 +1,7 @@
 import { lodash, random } from '../alias'
 import { GeneratorAbortionError } from '../error'
 import { createEmptyGrid } from '../grid'
-import { Direction, Has, Position, Size, Tile, Departure, Level } from '../type'
+import { Departure, Direction, Level, Position, Size, Tile } from '../type'
 import { Destination, Rail, Switch } from '../type/tileType'
 import { directionToDelta } from '../util/direction'
 import { distance, distance2, surroundingSquare } from '../util/position'
@@ -126,8 +126,8 @@ function coreGenerate(config: GeneratorConfig): Level {
       throw new GeneratorAbortionError('switch too close to the start station')
     }
     junction.type = 'switch'
+    junction.trainArray = []
     junction.otherExit = exit
-    junction.trainCount = 0
     junction.mouseIsOver = false
   }
 

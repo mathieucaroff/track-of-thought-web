@@ -1,7 +1,7 @@
 import { pixi, random } from './alias'
 
 import { clickSound } from './audio/sound'
-import { defaultColorList, parseColorList, Theme } from './color'
+import { defaultColorList, interpolateColor, parseColorList } from './color'
 import { generate } from './generator/generator'
 import { createEmptyGrid, getGrid } from './grid'
 import { parseLayout } from './layout'
@@ -14,13 +14,13 @@ import { Direction, Position } from './type'
 import { Switch } from './type/tileType'
 import { isStraight } from './util/direction'
 
-export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
+export async function setupGame(config: TrackOfThoughtConfig) {
   const layout = parseLayout(config.layout)
   console.info('layout', layout)
 
   document.body.classList.add('gamemode')
 
-  const sketch = createSketcher(layout, theme, config.showColorIndices)
+  const sketch = createSketcher(layout, config.theme, config.showColorIndices)
 
   const colorList = parseColorList(config.colorList)
   const colorListBaseLength = colorList.length
@@ -61,7 +61,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     score.showScore()
   }
 
-  const score = createScore(document.body, layout, theme)
+  const score = createScore(document.body, layout, config.theme)
 
   const graphicalGrid = createEmptyGrid<pixi.Container | null>({
     width: config.gridWidth,
@@ -70,10 +70,11 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
 
   const smartSwitchGrid = getSmartSwitchGrid(config, level, grid)
 
-  let app = new pixi.Application({
+  let app = new pixi.Application()
+  await app.init({
     antialias: true,
     resizeTo: window,
-    background: theme.background,
+    background: config.theme.background,
   })
   let canvas = app.view as HTMLCanvasElement
   setTimeout(() => {
@@ -95,7 +96,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
   }
 
   // Draw Start
-  let g = sketch.station(level.departure, 0, [theme.departure])
+  let g = sketch.station(level.departure, 0, [config.theme.departure])
   addPosition(g, level.departure)
   stationContainer.addChild(g)
 
@@ -145,7 +146,7 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     let result = new pixi.Container()
     result.addChild(drawTrack(track.entrance, track.otherExit))
     let g = new pixi.Graphics()
-    sketch.switchCircle(g, theme.switch)
+    sketch.switchCircle(g, config.theme.switch)
     result.addChild(g)
     result.addChild(drawTrack(track.entrance, track.exit))
     return result
@@ -159,21 +160,21 @@ export function setupGame(config: TrackOfThoughtConfig, theme: Theme) {
     clickSound.play()
   }
 
+  const getSwitchColor = interpolateColor(config.theme.switch, config.theme.switchWithTrain)
+  const getSwitchHoverColor = interpolateColor(
+    config.theme.switchHover,
+    config.theme.switchHoverWithTrain,
+  )
+
   const updateSwitchColor = (x: number, y: number) => {
     let rail = grid[y][x]
     if (rail?.type !== 'switch') {
       throw new Error('never, switch')
     }
-    let color = theme.switch
-    if (rail.mouseIsOver) {
-      if (rail.trainCount > 0) {
-        color = theme.switchHoverWithTrain
-      } else {
-        color = theme.switchHover
-      }
-    } else if (rail.trainCount > 0) {
-      color = theme.switchWithTrain
-    }
+    let bestTrainProgress = rail.trainArray.reduce((best, train) => {
+      return Math.max(best, train.progress)
+    }, 0)
+    let color = (rail.mouseIsOver ? getSwitchHoverColor : getSwitchColor)(bestTrainProgress)
     let g = graphicalGrid[y][x]
     sketch.switchCircle(g?.children[1] as pixi.Graphics, color)
   }

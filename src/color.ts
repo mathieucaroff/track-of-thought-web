@@ -24,12 +24,12 @@ export const defaultTheme = {
   pavement: 0xb0b0b0,
   asphalt: 0x37383f,
   departure: 0x000000,
-  switch: 0x4b494a,
+  switch: 0xffffff,
   switchHover: 0x9b999a,
   switchOutline: 0xdddddd,
   scoreBackground: 0x4b494a,
   switchWithTrain: 0x000000,
-  switchHoverWithTrain: 0xffffff,
+  switchHoverWithTrain: 0x000000,
 }
 
 export type Theme = typeof defaultTheme
@@ -62,4 +62,22 @@ export const defaultColorList = [
 
 export function getColorFromList(colorIndex: number, colorList: number[]) {
   return colorList[colorIndex % colorList.length]
+}
+
+export function interpolateColor(a: number, z: number) {
+  return (progress: number) => {
+    const ar = (a >> 16) & 0xff
+    const ag = (a >> 8) & 0xff
+    const ab = a & 0xff
+
+    const zr = (z >> 16) & 0xff
+    const zg = (z >> 8) & 0xff
+    const zb = z & 0xff
+
+    const r = Math.round(ar + (zr - ar) * progress)
+    const g = Math.round(ag + (zg - ag) * progress)
+    const b = Math.round(ab + (zb - ab) * progress)
+
+    return (r << 16) | (g << 8) | b
+  }
 }

@@ -1,3 +1,4 @@
+import { Train } from '../train'
 import { Direction, Position } from '../type'
 
 export interface Departure extends Position {
@@ -23,7 +24,7 @@ export interface Switch extends Position {
   exit: Direction
   otherExit: Direction
   state: 'initial' | 'swapped'
-  trainCount: number
+  trainArray: Train[]
   mouseIsOver: boolean
 }
 

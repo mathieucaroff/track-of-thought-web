@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "pixi.js": "^7.0.5",
+    "pixi.js": "^8.6.6",
     "random-js": "^2.1.0"
   },
   "devDependencies": {

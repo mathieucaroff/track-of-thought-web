@@ -152,47 +152,51 @@ export function createTrain(param: TrainParam) {
 
   let g = sketch.train(colorIndex, colorList)
 
-  const next = () => {
-    let { x, y } = position
-    let track = param.grid[y][x]
-    if (!track) {
-      throw new Error(`encountered a null entry in the grid, at ${y}:${x}`)
-    }
-    if (track.type === 'destination') {
-      throw new Error('never, destination')
-    }
-
-    let { dx, dy } = directionToDelta(track.exit)
-    position.x += dx
-    position.y += dy
+  const addTrainToSwitch = (tile: Switch, x: number, y: number) => {
+    tile.trainArray.push(me)
+    updateSwitchColor(x, y)
   }
-  const bumpSwitchTrainCount = (amount: number) => {
-    let { x, y } = position
-    let tile = grid[y][x]
-    if (tile?.type === 'switch') {
-      tile.trainCount += amount
-      updateSwitchColor(x, y)
-    }
+  const removeTrainFromSwitch = (tile: Switch, x: number, y: number) => {
+    tile.trainArray.splice(tile.trainArray.indexOf(me), 1)
+    updateSwitchColor(x, y)
   }
   const update = (timeStep: number) => {
+    let { x, y } = position
+    let tile = grid[y][x]
+    let tileIsSwitch = tile?.type === 'switch'
+    const next = () => {
+      if (!tile) {
+        throw new Error(`encountered a null entry in the grid, at ${y}:${x}`)
+      }
+      if (tile.type === 'destination') {
+        throw new Error('never, destination')
+      }
+
+      let { dx, dy } = directionToDelta(tile.exit)
+      position.x += dx
+      position.y += dy
+      ;({ x, y } = position)
+      tile = grid[y][x]
+      tileIsSwitch = tile?.type === 'switch'
+    }
     me.progress += timeStep / 80
     if (me.progress > 1) {
       if (autoPlayOnExit || gamePlay === 'switch') {
         let hasChanged = setSwitch()
-        if (gamePlay === 'switch') {
-          let { x, y } = position
-          let tile = grid[y][x]
-          if (tile?.type === 'switch') {
-            score.scoreEvent(!hasChanged)
-          }
+        if (gamePlay === 'switch' && tileIsSwitch) {
+          score.scoreEvent(!hasChanged)
         }
       }
-      bumpSwitchTrainCount(-1)
+      if (tileIsSwitch) {
+        removeTrainFromSwitch(tile as Switch, x, y)
+      }
       while (me.progress > 1) {
         next()
         me.progress -= 1
       }
-      bumpSwitchTrainCount(1)
+      if (tileIsSwitch) {
+        addTrainToSwitch(tile as Switch, x, y)
+      }
       if (autoPlayOnEntry) {
         // we've just arrived on the tile, so we aren't in a hurry to set it to
         // the right direction, so use the weak mode so that if there is already
@@ -200,6 +204,9 @@ export function createTrain(param: TrainParam) {
         let weak = true
         setSwitch(weak)
       }
+    }
+    if (tileIsSwitch) {
+      updateSwitchColor(x, y)
     }
     updatePosition()
     if (grid[position.y][position.x]?.type === 'destination' && me.progress >= 0.5) {
@@ -212,7 +219,7 @@ export function createTrain(param: TrainParam) {
     let { x, y } = position
     let tile = grid[y][x]
     if (tile?.type === 'switch') {
-      if (weak && tile.trainCount > 1) {
+      if (weak && tile.trainArray.length > 1) {
         return
       }
       let smartSwitch = smartSwitchGrid[y][x]!
@@ -295,4 +302,4 @@ export function createTrain(param: TrainParam) {
   return me
 }
 
-type Train = ReturnType<typeof createTrain>
+export type Train = ReturnType<typeof createTrain>
