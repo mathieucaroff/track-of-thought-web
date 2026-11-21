@@ -19,16 +19,16 @@ To see more url options, on computer, open the developper tools and look in the 
 
 ## Requirements
 
-- node.js and yarn
+- [bun](https://bun.sh)
 
 ## Building
 
-- Install dependencies by running `yarn`
-- Run `yarn build`
+- Install dependencies by running `bun install`
+- Run `bun run build`
 
 You can then open dist/index.html in your web browser of choice.
 
 ## Developing
 
-- Install dependencies by running `yarn`
-- Run `yarn serve`
+- Install dependencies by running `bun install`
+- Run `bun run dev`
