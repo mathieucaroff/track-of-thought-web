@@ -6,6 +6,7 @@ import { generate } from './generator/generator'
 import { createEmptyGrid, getGrid } from './grid'
 import { parseLayout } from './layout'
 import { TrackOfThoughtConfig } from './main'
+import { create } from './lib/create'
 import { createScore } from './score'
 import { createSketcher } from './sketch'
 import { getSmartSwitchGrid } from './tools/smartSwitchGrid'
@@ -14,7 +15,22 @@ import { Direction, Position } from './type'
 import { Switch } from './type/tileType'
 import { isStraight } from './util/direction'
 
-export async function setupGame(config: TrackOfThoughtConfig) {
+export interface GameNavigation {
+  // leave the game and go back to the level selection menu
+  onMenu: () => void
+  // start a new game at the same level
+  onReplay: () => void
+}
+
+export interface Game {
+  // stop the game and remove everything it added to the page
+  destroy: () => void
+}
+
+export async function setupGame(
+  config: TrackOfThoughtConfig,
+  navigation: GameNavigation,
+): Promise<Game> {
   const layout = parseLayout(config.layout)
   console.info('layout', layout)
 
@@ -59,10 +75,22 @@ export async function setupGame(config: TrackOfThoughtConfig) {
       g.eventMode = 'none'
     })
     canvas.style.cursor = 'inherit'
-    score.showScore()
+    menuButton.remove()
+    score.showScore([
+      { label: 'Play again', onClick: navigation.onReplay },
+      { label: 'Go to Menu', onClick: navigation.onMenu },
+    ])
   }
 
   const score = createScore(document.body, layout, config.theme)
+
+  const menuButton = create('button', {
+    className: 'gameButton gameMenuButton',
+    textContent: 'Back to Menu',
+    title: 'Back to the level selection (Escape)',
+    onclick: navigation.onMenu,
+  })
+  document.body.appendChild(menuButton)
 
   const graphicalGrid = createEmptyGrid<pixi.Container | null>({
     width: config.gridWidth,
@@ -227,16 +255,20 @@ export async function setupGame(config: TrackOfThoughtConfig) {
 
   // Manage the update speed
   let speedFactor = 1
-  window.addEventListener('keydown', (event) => {
+  const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === ' ') {
       speedFactor = 3
+    } else if (event.key === 'Escape') {
+      navigation.onMenu()
     }
-  })
-  window.addEventListener('keyup', (event) => {
+  }
+  const onKeyUp = (event: KeyboardEvent) => {
     if (event.key === ' ') {
       speedFactor = 1
     }
-  })
+  }
+  window.addEventListener('keydown', onKeyDown)
+  window.addEventListener('keyup', onKeyUp)
 
   app.stage.addChild(gameContainer)
   gameContainer.addChild(railContainer)
@@ -262,6 +294,7 @@ export async function setupGame(config: TrackOfThoughtConfig) {
   })
 
   let lastTime = Date.now()
+  let animationFrameId = 0
   const loop = () => {
     let elapsedTime = Date.now() - lastTime
     lastTime += elapsedTime
@@ -270,7 +303,20 @@ export async function setupGame(config: TrackOfThoughtConfig) {
     // keeps increasing
     let clampedTime = Math.min(1, elapsedTime / 20)
     trainManager.update(speedFactor * clampedTime)
-    requestAnimationFrame(loop)
+    animationFrameId = requestAnimationFrame(loop)
   }
   loop()
+
+  return {
+    destroy: () => {
+      cancelAnimationFrame(animationFrameId)
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      menuButton.remove()
+      score.destroy()
+      // removes the canvas from the page and frees the GPU resources
+      app.destroy({ removeView: true }, { children: true })
+      document.body.classList.remove('gamemode')
+    },
+  }
 }

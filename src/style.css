@@ -97,3 +97,42 @@ canvas.visible {
 .gamePlayDescription {
   font-size: 110%;
 }
+
+.gameButton {
+  padding: 8px 24px;
+  border: solid 4px #c7b59d;
+  color: #c7b59d;
+  background-color: #282d33;
+  font-size: 32px;
+  cursor: pointer;
+  transition: 0.15s linear;
+}
+
+.gameButton:hover,
+.gameButton:focus-visible {
+  color: #282d33;
+  background-color: #c7b59d;
+}
+
+/* top right, next to the GitHub corner */
+.gameMenuButton {
+  position: fixed;
+  top: 0;
+  right: 90px;
+  height: 56px;
+  padding: 0 20px;
+  font-size: 28px;
+  opacity: 40%;
+}
+
+.gameMenuButton:hover,
+.gameMenuButton:focus-visible {
+  opacity: 100%;
+}
+
+.scorePanelActions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
