@@ -4,7 +4,7 @@
   "description": "A game to train diveded attention",
   "repository": "https://github.com/mathieucaroff/track-of-thought-web",
   "author": "Mathieu CAROFF <mathieu.caroff@free.fr>",
-  "license": "ISC",
+  "license": "Jam",
   "scripts": {
     "dev": "parcel src/index.html",
     "build": "parcel build src/index.html",
