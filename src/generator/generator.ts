@@ -127,6 +127,7 @@ function coreGenerate(config: GeneratorConfig): Level {
       throw new GeneratorAbortionError('switch too close to the start station')
     }
     junction.type = 'switch'
+    junction.state = 'initial'
     junction.trainArray = []
     junction.otherExit = exit
     junction.mouseIsOver = false
