@@ -48,3 +48,52 @@ canvas.visible {
   color: #282d33;
   background-color: #c7b59d;
 }
+
+.gamePlaySelector {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.gamePlayOption {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px;
+  padding: 14px 20px;
+  width: 260px;
+  border: solid 4px #c7b59d;
+  color: #c7b59d;
+  background-color: #282d33;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s linear;
+}
+
+/* keep the radio input reachable by keyboard and screen readers, but hidden */
+.gamePlayOption input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gamePlayOption:hover {
+  border-color: #ffffff;
+}
+
+.gamePlayOption:has(input:checked) {
+  color: #282d33;
+  background-color: #c7b59d;
+}
+
+.gamePlayOption:has(input:focus-visible) {
+  outline: solid 3px #ffffff;
+  outline-offset: 2px;
+}
+
+.gamePlayTitle {
+  font-size: 200%;
+}
+
+.gamePlayDescription {
+  font-size: 110%;
+}

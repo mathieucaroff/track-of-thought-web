@@ -121,7 +121,33 @@ function main() {
     setupGame(config)
   } else {
     let levelSelected = false
+    let gamePlay = config.gamePlay
+    const gamePlayOptionArray: { value: GamePlay; title: string; description: string }[] = [
+      { value: 'switch', title: 'Switch', description: 'Set each switch before trains pass' },
+      { value: 'station', title: 'Station', description: "Guide trains to their color's station" },
+    ]
+    let gamePlaySelector = create(
+      'div',
+      { className: 'gamePlaySelector' },
+      gamePlayOptionArray.map(({ value, title, description }) =>
+        create('label', { className: 'gamePlayOption' }, [
+          create('input', {
+            type: 'radio',
+            name: 'gamePlay',
+            value,
+            checked: value === gamePlay,
+            onchange: () => {
+              gamePlay = value
+            },
+          }),
+          create('span', { className: 'gamePlayTitle', textContent: title }),
+          create('span', { className: 'gamePlayDescription', textContent: description }),
+        ]),
+      ),
+    )
     let levelSelectionDiv = create('div', { className: 'levelSelectionDiv' }, [
+      create('h1', { textContent: 'Select a game mode' }),
+      gamePlaySelector,
       create('h1', { textContent: 'Select a level' }),
     ])
     document.body.appendChild(levelSelectionDiv)
@@ -149,6 +175,7 @@ function main() {
               document.body.removeChild(levelSelectionDiv)
               let search = new URLSearchParams(location.search)
               search.set('level', levelNumber)
+              search.set('gamePlay', gamePlay)
               history.pushState({}, '', '?' + search)
               setupGame(getConfig(location))
             }
