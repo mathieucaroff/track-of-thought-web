@@ -112,11 +112,15 @@ function main() {
 
   document.documentElement.style.backgroundColor = toHtmlColor(config.theme.background)
 
-  document.body.innerHTML += githubCornerHTML(packageJson.repository, packageJson.version)
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    githubCornerHTML(packageJson.repository, packageJson.version),
+  )
 
   if (config.level > 0) {
     setupGame(config)
   } else {
+    let levelSelected = false
     let levelSelectionDiv = create('div', { className: 'levelSelectionDiv' }, [
       create('h1', { textContent: 'Select a level' }),
     ])
@@ -129,14 +133,26 @@ function main() {
           textContent: levelNumber,
           className: 'levelSelectionButton',
           onclick: () => {
+            // ignore clicks on other buttons once a level has been picked
+            if (levelSelected) {
+              return
+            }
+            levelSelected = true
             levelSelectionDiv.style.opacity = '0%'
-            levelSelectionDiv.addEventListener('transitionend', () => {
+            const onTransitionEnd = (event: TransitionEvent) => {
+              // the buttons' own hover transitions bubble up to the div; only
+              // react to the fade-out of the div itself
+              if (event.target !== levelSelectionDiv) {
+                return
+              }
+              levelSelectionDiv.removeEventListener('transitionend', onTransitionEnd)
               document.body.removeChild(levelSelectionDiv)
               let search = new URLSearchParams(location.search)
               search.set('level', levelNumber)
               history.pushState({}, '', '?' + search)
               setupGame(getConfig(location))
-            })
+            }
+            levelSelectionDiv.addEventListener('transitionend', onTransitionEnd)
           },
         }),
       )

@@ -56,14 +56,21 @@ export async function setupGame(config: TrackOfThoughtConfig) {
 
   const onGameEnd = () => {
     interativeGraphicalSwitchArray.forEach((g) => {
-      g.interactive = false
+      g.eventMode = 'none'
     })
+    canvas.style.cursor = 'inherit'
     score.showScore()
   }
 
   const score = createScore(document.body, layout, config.theme)
 
   const graphicalGrid = createEmptyGrid<pixi.Container | null>({
+    width: config.gridWidth,
+    height: config.gridHeight,
+  })
+
+  // inner disc of each switch, whose tint is used to show the switch color
+  const switchInnerGrid = createEmptyGrid<pixi.Graphics | null>({
     width: config.gridWidth,
     height: config.gridHeight,
   })
@@ -145,17 +152,17 @@ export async function setupGame(config: TrackOfThoughtConfig) {
   let drawSwitch = (track: Switch) => {
     let result = new pixi.Container()
     result.addChild(drawTrack(track.entrance, track.otherExit))
-    let g = new pixi.Graphics()
-    sketch.switchCircle(g, config.theme.switch)
-    result.addChild(g)
+    let circle = sketch.switchCircle(config.theme.switch)
+    result.addChild(circle.container)
     result.addChild(drawTrack(track.entrance, track.exit))
+    switchInnerGrid[track.y][track.x] = circle.inner
     return result
   }
   const toggleSwitch = (g: pixi.Container, rail: Switch) => {
     rail.state = rail.state === 'initial' ? 'swapped' : 'initial'
     ;[rail.exit, rail.otherExit] = [rail.otherExit, rail.exit]
-    let h: any = g
-    ;[h.children[0], h.children[2]] = [h.children[2], h.children[0]]
+    // use swapChildren so that pixi knows the render order has changed
+    g.swapChildren(g.children[0], g.children[2])
 
     clickSound.play()
   }
@@ -175,13 +182,14 @@ export async function setupGame(config: TrackOfThoughtConfig) {
       return Math.max(best, train.progress)
     }, 0)
     let color = (rail.mouseIsOver ? getSwitchHoverColor : getSwitchColor)(bestTrainProgress)
-    let g = graphicalGrid[y][x]
-    sketch.switchCircle(g?.children[1] as pixi.Graphics, color)
+    let inner = switchInnerGrid[y][x]!
+    // tint is a cheap property change, and pixi ignores it when unchanged
+    inner.tint = color
   }
 
   let interativeGraphicalSwitchArray: pixi.Container[] = []
   const makeSwitchInteractive = (g: pixi.Container, rail: Switch) => {
-    g.interactive = true
+    g.eventMode = 'static'
     interativeGraphicalSwitchArray.push(g)
     g.hitArea = new pixi.Circle(
       layout.squareWidth / 2,
@@ -203,7 +211,7 @@ export async function setupGame(config: TrackOfThoughtConfig) {
     })
   }
 
-  level.railArray.map((track) => {
+  level.railArray.forEach((track) => {
     let g: pixi.Container
     if (track.type === 'switch') {
       g = drawSwitch(track)

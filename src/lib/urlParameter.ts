@@ -51,8 +51,10 @@ export let resolveSearch = <T extends Record<string, any>>(
     if (!infoObject[key]) {
       return
     }
-    if (value === '') {
+    if (value === '' || value === 'true') {
       value = true
+    } else if (value === 'false') {
+      value = false
     } else if (!isNaN(value)) {
       value = +value
     }

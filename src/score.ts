@@ -26,7 +26,7 @@ export function createScore(container: HTMLElement, layout: Layout, theme: Theme
     style: {
       position: 'fixed',
       padding: '3px 15px',
-      height: `${layout.scoreHeight}}px`,
+      height: `${layout.scoreHeight}px`,
       backgroundColor: toHtmlColor(theme.scoreBackground),
       fontSize: `${layout.scoreHeight}px`,
       userSelect: 'none',

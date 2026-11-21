@@ -129,16 +129,23 @@ export function createSketcher(layout: Layout, theme: Theme, showColorIndices: b
     return h
   }
 
-  const switchCircle = (g: pixi.Graphics, circleColor: number) => {
-    g.clear()
-    g.circle(layout.squareWidth / 2, layout.squareWidth / 2, layout.switchRadius)
-    g.fill(theme.switchOutline)
-    g.circle(
+  // The inner disc is drawn in white once; its color is then changed through
+  // `tint`, which is much cheaper than clearing and rebuilding the geometry
+  const switchCircle = (circleColor: number) => {
+    let container = new pixi.Container()
+    let outline = new pixi.Graphics()
+    outline.circle(layout.squareWidth / 2, layout.squareWidth / 2, layout.switchRadius)
+    outline.fill(theme.switchOutline)
+    let inner = new pixi.Graphics()
+    inner.circle(
       layout.squareWidth / 2,
       layout.squareWidth / 2,
       layout.switchRadius - layout.switchOutlineWidth,
     )
-    g.fill(circleColor)
+    inner.fill(0xffffff)
+    inner.tint = circleColor
+    container.addChild(outline, inner)
+    return { container, inner }
   }
 
   return {

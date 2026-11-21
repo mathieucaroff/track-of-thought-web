@@ -30,8 +30,9 @@ function randomDeparture(config: GeneratorConfig): Departure {
 export function generate(config: GeneratorConfig) {
   for (let k = 0; ; k++) {
     try {
-      console.log('generating level')
-      return coreGenerate(config)
+      const level = coreGenerate(config)
+      console.info(`level generated after ${k + 1} attempt(s)`)
+      return level
     } catch (e) {
       if (e instanceof GeneratorAbortionError && k < config.retryCount) {
         continue

@@ -7,7 +7,9 @@ let createAudioManager = (url) => {
   let k = 0
   return {
     play: () => {
-      audioArray[k].play()
+      // play() rejects when the browser blocks audio; that must not be an
+      // unhandled rejection
+      audioArray[k].play()?.catch(() => {})
       k = (k + 1) % audioArray.length
     },
   }

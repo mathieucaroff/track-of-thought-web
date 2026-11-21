@@ -77,7 +77,8 @@ export function createTrainManager(param: TrainManagerParam) {
       container.addChild(train.g)
       trainArray.push(train)
 
-      train.progress += trainTime
+      // trainTime is measured in timeStep/60 units, train progress in timeStep/80 units
+      train.progress += (trainTime * 60) / 80
 
       sentTrainCount += 1
     }
@@ -96,7 +97,7 @@ export function createTrainManager(param: TrainManagerParam) {
           }
 
           container.removeChild(train.g)
-          train.g.destroy()
+          train.g.destroy({ children: true })
           return false
         }
         return true
@@ -223,9 +224,10 @@ export function createTrain(param: TrainParam) {
         return
       }
       let smartSwitch = smartSwitchGrid[y][x]!
-      let colorArray =
-        tile.state === 'initial' ? smartSwitch.colorIndexArray : smartSwitch.colorIndexOtherArray
-      let changeSwitch = colorArray.includes(me.colorIndex)
+      // colors reachable through the exit the switch is NOT currently pointing to
+      let otherBranchColorArray =
+        tile.state === 'initial' ? smartSwitch.colorIndexOtherArray : smartSwitch.colorIndexArray
+      let changeSwitch = otherBranchColorArray.includes(me.colorIndex)
       if (changeSwitch) {
         let g = graphicalGrid[y][x]!
         toggleSwitch(g, tile)

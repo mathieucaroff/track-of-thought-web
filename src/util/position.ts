@@ -74,9 +74,9 @@ export function surroundingThirteen(a: Position) {
 export function surroundingSquare(radius: number, a: Position) {
   let result: Position[] = []
   Array.from({ length: 2 * radius - 1 }, (_, by) => {
-    let y = by - radius
+    let y = by - (radius - 1)
     Array.from({ length: 2 * radius - 1 }, (_, bx) => {
-      let x = bx - radius
+      let x = bx - (radius - 1)
       result.push({ x: x + a.x, y: y + a.y })
     })
   })
