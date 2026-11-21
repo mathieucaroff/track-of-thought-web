@@ -1,7 +1,7 @@
 import { Level, Size } from './type'
 import { Tile } from './type/tileType'
 
-export function createEmptyGrid<T>(size) {
+export function createEmptyGrid<T>(size: Size) {
   return Array.from({ length: size.height }, () =>
     Array.from({ length: size.width }, () => null),
   ) as T[][]

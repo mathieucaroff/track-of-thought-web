@@ -13,7 +13,7 @@ export function parseThemeObject(input: string) {
 
   input.split(',').forEach((pair) => {
     let [name, value] = pair.split(':')
-    result[name] = parseInt(value, 16)
+    result[name as keyof Theme] = parseInt(value, 16)
   })
 
   return result

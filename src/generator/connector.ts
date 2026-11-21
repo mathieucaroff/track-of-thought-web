@@ -9,7 +9,7 @@ import { directionToDelta, moveDirectionArray, oppositeOf } from '../util/direct
 import { positionEqual } from '../util/position'
 
 function isDirectionValid(grid: (Tile | null)[][], cursor: Position, target: Position, track: any) {
-  return (direction) => {
+  return (direction: Direction) => {
     if (direction === track?.exit) {
       return false
     }
@@ -44,7 +44,7 @@ export function railwayConnection(grid: (Tile | null)[][], start: Tile, destinat
   const CURSOR_LOOP_LIMIT = 100 + grid.length + grid[0].length
   for (let k = 0; k < CURSOR_LOOP_LIMIT; k++) {
     // determine a valid direction
-    let [direction] = moveDirectionArray(cursor, target).filter(
+    let [direction]: (Direction | undefined)[] = moveDirectionArray(cursor, target).filter(
       isDirectionValid(grid, cursor, target, track),
     )
     if (direction === undefined) {

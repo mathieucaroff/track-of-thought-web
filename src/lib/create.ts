@@ -11,14 +11,13 @@ export let create = <K extends keyof HTMLElementTagNameMap>(
   // Copy each attribute
   Object.entries(attribute).forEach(([name, value]) => {
     if (name === 'style') {
-      Object.entries(value as any).forEach(([k, v]) => {
-        elem.style[k] = v
-      })
+      Object.assign(elem.style, value)
       return
     }
 
-    if (elem[name] !== undefined) {
-      elem[name] = value
+    const elemRecord = elem as unknown as Record<string, unknown>
+    if (elemRecord[name] !== undefined) {
+      elemRecord[name] = value
     } else {
       elem.setAttribute(name, value as any)
     }

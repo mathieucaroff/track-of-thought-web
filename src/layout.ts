@@ -42,7 +42,7 @@ export function parseLayout(input: string): Layout {
   if (input) {
     input.split(',').forEach((pair) => {
       let [name, value] = pair.split(':')
-      infoObject[name] = [() => +value]
+      infoObject[name as keyof Layout] = [() => +value]
     })
   }
 

@@ -14,7 +14,7 @@ export function trackIsTooLinear(
   return longestTrack(tile, grid) > maximumTrackLength
 }
 
-function longestTrack(tile: Tile, grid: (Tile | null)[][]) {
+function longestTrack(tile: Tile, grid: (Tile | null)[][]): number {
   if (!isRail(tile)) {
     return 0
   }

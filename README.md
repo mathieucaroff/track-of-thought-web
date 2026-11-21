@@ -26,7 +26,7 @@ To see more url options, on computer, open the developper tools and look in the 
 - Install dependencies by running `bun install`
 - Run `bun run build`
 
-You can then open dist/index.html in your web browser of choice.
+The result is written to `dist/`. Run `bun run preview` to serve it locally.
 
 ## Developing
 

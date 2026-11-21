@@ -83,7 +83,7 @@ function getConfig(location: Location) {
     device: [() => 'detect'],
     duration: [() => 100],
     gamePlay: [() => 'switch'],
-    generateRetryCount: [() => (process.env.NODE_ENV === 'production' ? 200_000 : 2_000)],
+    generateRetryCount: [() => (import.meta.env.PROD ? 200_000 : 2_000)],
     gridHeight: [({ level, device }) => levelInfo(level(), device()).gridHeight],
     gridWidth: [({ level, device }) => levelInfo(level(), device()).gridWidth],
     layout: [
